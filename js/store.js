@@ -41,7 +41,8 @@
       plans: [],            // {id, date, title, time, done}
       french: {
         level: 'A1',
-        records: {},        // date -> {duration, tasks:{listen,speak,read}, test:{...}}
+        videos: [],         // 用户自添加的教学视频 {topic, url}
+        records: {},        // date -> {skills, quiz, quizScore, videos, done}
       },
       viral: { date: '', items: [] },
       tea: { favorites: [], week: { start: '', plan: {} } }, // 茶饮管家：收藏id / 周计划
@@ -181,14 +182,80 @@
     return DB.plans.filter((p) => p.date === date);
   }
 
-  /* ---------- 法语 ---------- */
+  /* ---------- 法语 ----------
+     进度模型：听说读写四项技能，每项每天若干素材条目，
+     完成度 = 已勾条目 / 当日条目数；frenchDone 由四项是否全满推导。 */
   function setFrenchLevel(level) { DB.french.level = level; save(); }
   function recordFrench(date, rec) {
     DB.french.records[date] = Object.assign(DB.french.records[date] || {}, rec);
     save();
   }
   function getFrench(date) { return DB.french.records[date]; }
-  function frenchDone(date) { return !!(DB.french.records[date] && DB.french.records[date].done); }
+  function ensureFrenchRec(date) {
+    const r = DB.french.records[date] || (DB.french.records[date] = {});
+    r.skills = r.skills || { listen: {}, speak: {}, read: {}, write: {} };
+    return r;
+  }
+  // 勾选/取消某技能某条素材
+  function setFrenchSkillItem(date, skill, id, done) {
+    const r = ensureFrenchRec(date);
+    r.skills[skill] = r.skills[skill] || {};
+    r.skills[skill][id] = Object.assign(r.skills[skill][id] || {}, { done: done });
+    save();
+  }
+  function getFrenchSkillItem(date, skill, id) {
+    const r = DB.french.records[date];
+    return (r && r.skills && r.skills[skill]) ? (r.skills[skill][id] || null) : null;
+  }
+  // 写作文本自动保存
+  function setFrenchWriteText(date, id, text) {
+    const r = ensureFrenchRec(date);
+    r.skills.write = r.skills.write || {};
+    r.skills.write[id] = Object.assign(r.skills.write[id] || {}, { text: text });
+    save();
+  }
+  // 单项技能进度 {done,total,pct}
+  function frenchSkillProgress(date, skill, total) {
+    const r = DB.french.records[date];
+    let done = 0;
+    if (r && r.skills && r.skills[skill]) {
+      Object.keys(r.skills[skill]).forEach((id) => { if (r.skills[skill][id].done) done++; });
+    }
+    return { done: done, total: total, pct: total ? Math.round((done / total) * 100) : 0 };
+  }
+  // 今日是否全部完成：手动 done 优先；否则看四项技能是否全满
+  function frenchDone(date) {
+    const r = DB.french.records[date];
+    if (r && r.done) return true; // 手动覆盖（日历补卡）
+    const F = global.French;
+    if (F && F.SKILLS && F.skillTotals) {
+      const lv = DB.french.level;
+      const totals = F.skillTotals(date, lv);
+      let any = false, all = true;
+      F.SKILLS.forEach((sk) => {
+        const total = totals[sk.key];
+        let done = 0;
+        if (r && r.skills && r.skills[sk.key]) {
+          Object.keys(r.skills[sk.key]).forEach((id) => { if (r.skills[sk.key][id].done) done++; });
+        }
+        if (total > 0) { any = true; if (done < total) all = false; }
+      });
+      if (any) return all;
+    }
+    return false;
+  }
+  // 一键完成今日所有技能条目
+  function completeFrenchToday(date) {
+    const F = global.French;
+    if (!F) return;
+    const lv = DB.french.level;
+    const totals = F.skillTotals(date, lv);
+    F.SKILLS.forEach((sk) => {
+      F.dailySkillItems(sk.key, date, lv, totals[sk.key]).forEach((it) => {
+        setFrenchSkillItem(date, sk.key, it.id, true);
+      });
+    });
+  }
   function toggleFrench(date) {
     const r = DB.french.records[date] || { done: false };
     r.done = !r.done;
@@ -262,7 +329,7 @@
     addRecipe, updateRecipe, removeRecipe,
     upsertDiary, getDiary, removeDiary,
     addPlan, updatePlan, removePlan, plansOn,
-    setFrenchLevel, recordFrench, getFrench, frenchDone, toggleFrench, setFrenchVideo,
+    setFrenchLevel, recordFrench, getFrench, ensureFrenchRec, setFrenchSkillItem, getFrenchSkillItem, setFrenchWriteText, frenchSkillProgress, frenchDone, completeFrenchToday, toggleFrench, setFrenchVideo,
     setTheme, applyTheme,
     isTeaFav, toggleTeaFav, setTeaDay, clearTeaDay, getTeaPlan,
     todaySummary, exportData, importData,

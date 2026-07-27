@@ -465,6 +465,19 @@
   /* ============================================================
      法语学习
      ============================================================ */
+  // 浏览器 TTS：用法语朗读素材（听/说模块的点读）
+  function speakFr(text) {
+    try {
+      if (!('speechSynthesis' in window)) { toast('当前环境不支持朗读'); return; }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'fr-FR';
+      u.rate = 0.85;
+      u.pitch = 1;
+      window.speechSynthesis.speak(u);
+    } catch (e) {}
+  }
+
   function renderFrench() {
     const lvl = French.getLevel(S.DB.french.level);
     const topics = French.lessonTopics(lvl.key);
@@ -482,22 +495,65 @@
         <button class="btn ghost sm" data-action="fr-add-video" data-topic="${esc(t)}">＋ 视频</button>
       </div>`;
     }).join('');
+    // 兼容旧数据：保证 quiz 已生成并持久化
     let rec = S.getFrench(ui.frenchDate) || {};
-    if (!rec.tasks) rec.tasks = French.genTasks(lvl.key);
-    if (!rec.quiz) rec.quiz = French.genQuiz(lvl.key, 4);
-    if (!rec.duration) rec.duration = 20;
+    if (!rec.quiz) rec.quiz = French.genQuiz(S.DB.french.level, 4);
     S.recordFrench(ui.frenchDate, rec);
-    const tasks = rec.tasks;
-    const quizList = rec.quiz;
-    const dur = rec.duration;
 
-    const taskBlock = (key, ico, label, text, done) => `
-      <div class="task">
-        <div class="check ${done ? 'on' : ''}" data-action="fr-task" data-key="${key}">${done ? '✓' : ''}</div>
-        <div class="tk">${ico}</div>
-        <div class="habit-main"><div class="habit-name">${label}</div><div class="habit-meta">${esc(text)}</div></div>
+    // 总进度（听说读写四项之和）
+    const totals = French.skillTotals(ui.frenchDate, S.DB.french.level);
+    let totDone = 0, totAll = 0;
+    French.SKILLS.forEach((sk) => {
+      const p = S.frenchSkillProgress(ui.frenchDate, sk.key, totals[sk.key]);
+      totDone += p.done; totAll += totals[sk.key];
+    });
+    const overallPct = totAll ? Math.round((totDone / totAll) * 100) : 0;
+    const allDone = overallPct === 100;
+
+    // 渲染单个技能卡片（含具体素材 + 进度条）
+    const renderSkill = (skill) => {
+      const total = totals[skill.key];
+      const items = French.dailySkillItems(skill.key, ui.frenchDate, S.DB.french.level, total);
+      const prog = S.frenchSkillProgress(ui.frenchDate, skill.key, total);
+      const pct = prog.pct;
+      const itemsHTML = items.map((it) => {
+        const st = S.getFrenchSkillItem(ui.frenchDate, skill.key, it.id);
+        const done = !!(st && st.done);
+        if (skill.kind === 'write') {
+          const text = (st && st.text) || '';
+          return `<div class="fr-item ${done ? 'done' : ''}">
+            <div class="fr-item-main">
+              <div class="fr-item-q">✍️ ${esc(it.prompt)}</div>
+              ${it.vocab ? `<div class="fr-item-tip">📌 ${esc(it.vocab)}</div>` : ''}
+              <textarea class="fr-write" data-write data-skill="${skill.key}" data-id="${esc(it.id)}" placeholder="在这里用法语写一写，自动保存…">${esc(text)}</textarea>
+              <details class="fr-ex"><summary>看示例</summary><div class="fr-ex-body">${esc(it.model)}</div></details>
+            </div>
+            <button class="check ${done ? 'on' : ''}" data-action="fr-skill-item" data-skill="${skill.key}" data-id="${esc(it.id)}" title="标记完成">${done ? '✓' : ''}</button>
+          </div>`;
+        }
+        const audioBtn = (skill.kind === 'audio')
+          ? `<button class="icon-btn fr-tts" data-action="fr-tts" data-text="${esc(it.fr)}" title="朗读">🔊</button>` : '';
+        return `<div class="fr-item ${done ? 'done' : ''}">
+          <div class="fr-item-main">
+            <div class="fr-item-fr">${audioBtn}<span class="fr-fr-text">${esc(it.fr)}</span></div>
+            <div class="fr-item-zh">${esc(it.zh)}</div>
+            ${it.tip ? `<div class="fr-item-tip">💡 ${esc(it.tip)}</div>` : ''}
+          </div>
+          <button class="check ${done ? 'on' : ''}" data-action="fr-skill-item" data-skill="${skill.key}" data-id="${esc(it.id)}" title="标记完成">${done ? '✓' : ''}</button>
+        </div>`;
+      }).join('');
+      return `<div class="card fr-skill ${pct === 100 ? 'done' : ''}">
+        <div class="fr-skill-head">
+          <span class="fr-skill-ico">${skill.ico}</span>
+          <span class="fr-skill-name">${skill.name} · ${skill.label.split(' ')[1] || skill.label}</span>
+          <span class="fr-skill-pct">${prog.done}/${total} · ${pct}%</span>
+        </div>
+        <div class="fr-progress ${pct === 100 ? 'done' : ''}"><i style="width:${pct}%"></i></div>
+        <div class="fr-items">${itemsHTML}</div>
       </div>`;
+    };
 
+    const quizList = rec.quiz;
     const quizHTML = quizList.map((q, qi) => `
       <div class="quiz" style="margin-bottom:12px">
         <div class="q">${qi + 1}. ${esc(q.q)}</div>
@@ -507,8 +563,14 @@
 
     const html = `
       <div class="view-head">
-        <div><div class="view-title">法语学习 · ${lvl.name}</div><div class="view-desc">${esc(lvl.desc)} · 听说读分项 + 随堂测试</div></div>
-        <button class="btn ${S.frenchDone(ui.frenchDate) ? 'ghost' : ''}" data-action="fr-toggle">${S.frenchDone(ui.frenchDate) ? '✓ 今日已学' : '✓ 标记今日有学'}</button>
+        <div><div class="view-title">法语学习 · ${lvl.name}</div><div class="view-desc">${esc(lvl.desc)} · 听说读写分项 + 随堂测</div></div>
+        <button class="btn ${allDone ? 'ghost' : ''}" data-action="fr-complete">${allDone ? '🎉 今日已完成' : '✓ 一键完成今日'}</button>
+      </div>
+
+      <div class="card fr-overall ${allDone ? 'done' : ''}">
+        <div class="fr-overall-top"><span>📊 今日总进度</span><span class="fr-overall-pct">${totDone}/${totAll} 项 · ${overallPct}%</span></div>
+        <div class="fr-progress big ${overallPct === 100 ? 'done' : ''}"><i style="width:${overallPct}%"></i></div>
+        <p class="muted" style="margin:8px 0 0">每学完一条素材就勾一下，进度像看视频一样实时累加；四项全绿即今日完成。</p>
       </div>
 
       <div class="card" style="margin-bottom:18px">
@@ -521,8 +583,8 @@
       </div>
 
       <div class="card" style="margin-bottom:18px">
-        <div class="sec-title">📺 今日跟学 · B站热门法语</div>
-        <p class="muted" style="margin:2px 0 10px">按你的等级自动排好，点「一键跟学」直接开练并打卡，或跳转 B站看原视频。每天自动换一批。</p>
+        <div class="sec-title">📺 延伸跟学 · B站热门法语</div>
+        <p class="muted" style="margin:2px 0 10px">听力/口语的扩展素材：点「一键跟学」直接开练并打卡，或跳转 B站看原视频。每天自动换一批。</p>
         <div class="task-list">
           ${videos.map((v) => {
             const done = !!studiedMap[v.id];
@@ -540,27 +602,15 @@
         </div>
       </div>
 
-      <div class="grid grid-2">
-        <div class="card">
-          <div class="sec-title">🎯 ${ui.frenchDate} 学习安排</div>
-          <div class="field"><label>学习时长</label>
-            <div class="dur-pick">
-              ${[10, 20, 30].map((m) => `<span class="tab ${m === dur ? 'active' : ''}" data-action="fr-dur" data-m="${m}">${m} 分钟</span>`).join('')}
-            </div>
-          </div>
-          <div class="task-list">
-            ${taskBlock('listen', '🎧', '听 Listen', tasks.listen, rec.tasks && rec.tasksDone && rec.tasksDone.listen)}
-            ${taskBlock('speak', '🗣', '说 Speak', tasks.speak, rec.tasksDone && rec.tasksDone.speak)}
-            ${taskBlock('read', '📖', '读 Read', tasks.read, rec.tasksDone && rec.tasksDone.read)}
-          </div>
-          <button class="btn sm" style="margin-top:12px" data-action="fr-newtasks">🔁 换一组练习</button>
-        </div>
-        <div class="card">
-          <div class="sec-title">📝 随堂测试</div>
-          <p class="muted">每次学完做一组，检验吸收。点选项立即判分。</p>
-          ${quizHTML}
-          <button class="btn ghost sm" data-action="fr-newquiz">🔁 换一组题</button>
-        </div>
+      <div class="fr-skills">
+        ${French.SKILLS.map(renderSkill).join('')}
+      </div>
+
+      <div class="card">
+        <div class="sec-title">📝 随堂测试</div>
+        <p class="muted">每次学完做一组，检验吸收。点选项立即判分。</p>
+        ${quizHTML}
+        <button class="btn ghost sm" data-action="fr-newquiz">🔁 换一组题</button>
       </div>`;
     mount(html);
   }
@@ -875,16 +925,16 @@
       case 'tea-clear-day': { S.clearTeaDay(t.dataset.date); closeModal(); renderTea(); break; }
       // 法语
       case 'fr-level': S.setFrenchLevel(t.dataset.key); ui.frenchDate = S.todayStr(); renderFrench(); toast('已切到 ' + t.dataset.key); break;
-      case 'fr-dur': { const r = S.getFrench(ui.frenchDate) || {}; r.duration = parseInt(t.dataset.m, 10); S.recordFrench(ui.frenchDate, r); renderFrench(); break; }
-      case 'fr-task': {
-        const r = S.getFrench(ui.frenchDate) || {}; r.tasksDone = r.tasksDone || {}; r.tasksDone[t.dataset.key] = !r.tasksDone[t.dataset.key];
-        const allDone = r.tasksDone.listen && r.tasksDone.speak && r.tasksDone.read;
-        r.done = allDone; S.recordFrench(ui.frenchDate, r); refreshTop(); renderFrench(); break;
+      case 'fr-skill-item': {
+        const sk = t.dataset.skill, id = t.dataset.id;
+        const cur = S.getFrenchSkillItem(ui.frenchDate, sk, id);
+        S.setFrenchSkillItem(ui.frenchDate, sk, id, !(cur && cur.done));
+        refreshTop(); renderFrench(); break;
       }
-      case 'fr-newtasks': { const r = S.getFrench(ui.frenchDate) || {}; r.tasks = French.genTasks(S.DB.french.level); r.tasksDone = {}; S.recordFrench(ui.frenchDate, r); renderFrench(); break; }
+      case 'fr-complete': { S.completeFrenchToday(ui.frenchDate); toast('今日全部完成 🎉'); refreshTop(); renderFrench(); break; }
+      case 'fr-tts': speakFr(t.dataset.text); break;
       case 'fr-newquiz': { const r = S.getFrench(ui.frenchDate) || {}; r.quiz = French.genQuiz(S.DB.french.level, 4); S.recordFrench(ui.frenchDate, r); renderFrench(); break; }
       case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o); break;
-      case 'fr-toggle': { const on = S.toggleFrench(ui.frenchDate); toast(on ? '已标记今日有学 ✓' : '已取消'); refreshTop(); renderFrench(); break; }
       case 'fr-add-video': frAddVideoModal(t.dataset.topic); break;
       // 法语每日跟学：一键开练（跳转 B站并打卡）
       case 'fr-video-study': {
@@ -928,6 +978,13 @@
       e.preventDefault();
       doTeaSearch();
     }
+  });
+
+  // 法语写作文本框：输入即自动保存（不重渲染，避免丢失焦点）
+  document.addEventListener('input', (e) => {
+    const ta = e.target.closest && e.target.closest('[data-write]');
+    if (!ta) return;
+    S.setFrenchWriteText(ui.frenchDate, ta.dataset.id, ta.value);
   });
 
   // 弹层内事件（保存按钮等）

@@ -22,30 +22,181 @@
     C1: ['学术写作规范', '修辞与论证', '哲学与思辨阅读', '商务法语邮件', '文学批评写法', '视译与同传入门'],
   };
 
-  // 听说读任务模板（按等级给不同难度）
-  const TASK_BANK = {
+  /* ---------------- 听说读写 · 四项技能 ----------------
+     每个技能按等级给出「具体学习素材」（不是一句打卡提示）。
+     听/说 素材可用浏览器 TTS 朗读；读 带生词；写 带题目+示例+核心词。
+     每天从素材池按日期确定性轮排，保证"每天内容不同但可复现"。 */
+  const SKILLS = [
+    { key: 'listen', name: '听', ico: '🎧', label: '听力 Listen', perDay: 3, kind: 'audio' },
+    { key: 'speak',  name: '说', ico: '🗣', label: '口语 Speak', perDay: 3, kind: 'audio' },
+    { key: 'read',   name: '读', ico: '📖', label: '阅读 Read',  perDay: 2, kind: 'read' },
+    { key: 'write',  name: '写', ico: '✍', label: '写作 Write',  perDay: 2, kind: 'write' },
+  ];
+
+  // raw 素材：listen/speak/read -> {fr, zh, tip}；write -> {prompt, model, vocab}
+  const SKILL_RAW = {
     listen: {
-      A1: ['听一段"自我介绍"对话，跟读 2 遍，注意 liason 连读', '盲听数字 1-20 录音，写出你听到的 5 个', '听一首法语儿歌，圈出学过的颜色词'],
-      A2: ['听一段假期叙述，记录 3 个 passé composé 动词', '听播客片段，概括说话人去了哪里', '听点餐对话，写下点的两道菜'],
-      B1: ['听 TED-Ed 法语短片，记 3 个表达观点的短语', '听新闻 1 分钟，复述核心事件', '听辩论片段，判断双方态度'],
-      B2: ['听一篇社论，提炼作者论点与支持论据', '听访谈，分析语气与潜台词', '听无字幕报道，写 100 字摘要'],
-      C1: ['听学术讲座 5 分钟，做结构化笔记', '听文学朗读，体会节奏与停顿', '听辩论，辨析逻辑谬误'],
+      A1: [
+        { fr: 'Bonjour, comment allez-vous ?', zh: '您好，您好吗？', tip: '注意 vous 的 /v/ 与 allez 的连读' },
+        { fr: 'Je m\'appelle Marie.', zh: '我叫玛丽。', tip: 'appelle 中 ll 发 /j/' },
+        { fr: 'Merci beaucoup !', zh: '非常感谢！', tip: 'beaucoup 重音在 beau' },
+        { fr: 'Quel est votre nom ?', zh: '您叫什么名字？', tip: 'quel 发 /kɛl/' },
+        { fr: 'Je ne comprends pas.', zh: '我没听懂。', tip: 'ne...pas 构成否定框' },
+        { fr: 'À bientôt !', zh: '回头见！', tip: 'bientôt 发 /bjɛ̃to/' },
+      ],
+      A2: [
+        { fr: 'Hier, je suis allé au cinéma.', zh: '昨天我去看电影了。', tip: '复合过去时：je suis allé' },
+        { fr: 'On a visité un musée intéressant.', zh: '我们参观了一个有趣的博物馆。', tip: 'visitée 是过去分词' },
+        { fr: 'Elle est tombée malade la semaine dernière.', zh: '她上周生病了。', tip: 'tomber 用 être 作助动词' },
+        { fr: 'Nous avons pris le train pour Lyon.', zh: '我们坐火车去了里昂。', tip: 'pris 是 prendre 的过去分词' },
+        { fr: 'Tu as déjà lu ce livre ?', zh: '你已经读过这本书了吗？', tip: 'déjà = 已经' },
+        { fr: 'Il a plu toute la journée.', zh: '下了一整天的雨。', tip: 'plu 是 pleuvoir 的过去分词' },
+      ],
+      B1: [
+        { fr: 'À mon avis, le vélo est écologique.', zh: '我认为自行车很环保。', tip: 'à mon avis = 我认为' },
+        { fr: 'Il faut réduire notre consommation de plastique.', zh: '我们应当减少塑料消费。', tip: 'réduire = 减少' },
+        { fr: 'Selon l\'étude, le climat se réchauffe.', zh: '据研究，气候正在变暖。', tip: 'selon = 根据' },
+        { fr: 'Je trouve cette idée plutôt convaincante.', zh: '我觉得这个想法挺有说服力。', tip: 'convaincant = 有说服力的' },
+        { fr: 'On devrait privilégier les transports en commun.', zh: '我们应当优先公共交通。', tip: 'privilégier = 优先' },
+        { fr: 'Bien que ce soit cher, la qualité est là.', zh: '尽管贵，但质量摆在那里。', tip: 'bien que 后接虚拟式' },
+      ],
+      B2: [
+        { fr: 'L\'auteur déconstruit le mythe du progrès infini.', zh: '作者解构了"无限进步"的神话。', tip: 'déconstruire = 解构' },
+        { fr: 'Cette mesure soulève de vives critiques.', zh: '这项措施引发强烈批评。', tip: 'soulever = 引发' },
+        { fr: 'Le débat oppose deux visions de la société.', zh: '辩论让两种社会愿景对立。', tip: 'opposer = 使对立' },
+        { fr: 'On ne saurait réduire le bonheur au PIB.', zh: '不能把幸福简化为 GDP。', tip: 'ne saurait = 不应' },
+        { fr: 'Ces données corroborent l\'hypothèse initiale.', zh: '这些数据证实了最初的假设。', tip: 'corroborer = 证实' },
+        { fr: 'Le paradoxe réside dans notre dépendance technique.', zh: '悖论在于我们的技术依赖。', tip: 'paradoxe = 悖论' },
+      ],
     },
     speak: {
-      A1: ['用 3 个新词各造 1 句并录音', '对着镜子做 30 秒法语自我介绍', '模仿音频跟读，注意语调'],
-      A2: ['用 passé composé 讲一件上周发生的事（1 分钟）', '角色扮演：在咖啡馆点单', '描述一张照片里的人'],
-      B1: ['就"是否应该环保出行"说 1 分钟看法', '用 si 条件句描述一个假设场景', '模拟一次面试自我介绍'],
-      B2: ['就一个社会话题做 2 分钟陈述', '反驳一段给定观点，限时 1 分钟', '用近义词替换复述同一句话'],
-      C1: ['做 3 分钟学术主题演讲', '即兴评论一则新闻', '用法语总结你正在读的书'],
+      A1: [
+        { fr: 'Bonsoir, je voudrais une table pour deux.', zh: '晚上好，我想要一张两人桌。', tip: 'voudrais 是礼貌虚拟式' },
+        { fr: 'L\'addition, s\'il vous plaît.', zh: '买单，谢谢。', tip: 'addition 注意重音在末尾' },
+        { fr: 'Où sont les toilettes ?', zh: '洗手间在哪里？', tip: 'toilettes 发 /twa.lɛt/' },
+        { fr: 'Je voudrais un café crème.', zh: '我想要一杯奶咖。', tip: 'crème 含鼻化元音' },
+        { fr: 'Combien ça coûte ?', zh: '这个多少钱？', tip: 'coûte 发 /kut/' },
+        { fr: 'Parlez lentement, s\'il vous plaît.', zh: '请说慢一点。', tip: 'lentement 发 /lɑ̃tmɑ̃/' },
+      ],
+      A2: [
+        { fr: 'La semaine dernière, je suis allé à la plage.', zh: '上周我去了海滩。', tip: 'plage = 海滩' },
+        { fr: 'Si j\'avais le temps, je ferais du sport.', zh: '如果有时间，我会去运动。', tip: 'si + imparfait → 条件式' },
+        { fr: 'Je voudrais réserver une chambre.', zh: '我想预订一个房间。', tip: 'réserver = 预订' },
+        { fr: 'Pouvez-vous m\'aider, s\'il vous plaît ?', zh: '您能帮我一下吗？', tip: 'pouvez = pouvoir 的变位' },
+        { fr: 'Je préfère le thé vert au café.', zh: '比起咖啡我更喜欢绿茶。', tip: 'préférer = 更喜欢' },
+        { fr: 'Qu\'est-ce que tu fais ce week-end ?', zh: '你这个周末做什么？', tip: 'ce week-end = 这周末' },
+      ],
+      B1: [
+        { fr: 'Je pense que nous devrions agir maintenant.', zh: '我认为我们现在就该行动。', tip: 'devrions = 应该（条件式）' },
+        { fr: 'D\'une part... d\'autre part...', zh: '一方面…另一方面…', tip: '议论文常用连接词' },
+        { fr: 'Si j\'étais maire, je créerais des pistes cyclables.', zh: '如果我是市长，我会建自行车道。', tip: '条件式表达假设' },
+        { fr: 'Qu\'en penses-tu de cette proposition ?', zh: '你怎么看这个提议？', tip: 'proposition = 提议' },
+        { fr: 'Il est essentiel de protéger la biodiversité.', zh: '保护生物多样性至关重要。', tip: 'essentiel = 必要的' },
+        { fr: 'Je suis tout à fait d\'accord avec vous.', zh: '我完全同意您的看法。', tip: 'tout à fait = 完全' },
+      ],
+      B2: [
+        { fr: 'Il conviendrait de nuancer cet argument.', zh: '应当为这个论点加上一些限定。', tip: 'nuancer = 使更 nuanced' },
+        { fr: 'Loin de moi l\'idée de généraliser.', zh: '我绝无意一概而论。', tip: 'loin de moi = 绝非' },
+        { fr: 'Certes, mais cela ne justifie pas tout.', zh: '诚然，但这并不能开脱一切。', tip: 'certes = 诚然' },
+        { fr: 'Je réfute l\'idée selon laquelle le marché tout résout.', zh: '我驳斥"市场能解决一切"的观点。', tip: 'réfuter = 驳斥' },
+        { fr: 'En définitive, le compromis s\'impose.', zh: '归根结底，必须妥协。', tip: 'en définitive = 归根结底' },
+        { fr: 'Quoi qu\'il en soit, l\'urgence reste climatique.', zh: '无论如何，紧迫性仍在于气候。', tip: 'quoi qu\'il en soit = 无论如何' },
+      ],
     },
     read: {
-      A1: ['朗读课文第 1 课，注意发音与停顿', '阅读短句，标出主语和动词', '看图读词，建立图文对应'],
-      A2: ['朗读旅行日记，划出过去时', '读菜单，说出 3 道菜的主要成分', '读一封短信，回答 2 个问题'],
-      B1: ['精读观点短文，划出连接词', '对比两篇立场不同的文章', '朗读并翻译一段文化介绍'],
-      B2: ['精读社论，标注论点结构', '阅读文学节选，赏析修辞', '速读报道，30 秒概括'],
-      C1: ['研读学术论文摘要，写批判笔记', '分析文学段落的叙事视角', '对照中英版本做视译练习'],
+      A1: [
+        { fr: 'Le chat noir dort sur le canapé.', zh: '黑猫睡在沙发上。', tip: '生词：chat=猫，canapé=沙发' },
+        { fr: 'J\'aime les fleurs rouges.', zh: '我喜欢红色的花。', tip: '生词：fleur=花，rouge=红色' },
+        { fr: 'Il fait beau aujourd\'hui.', zh: '今天天气很好。', tip: 'Il fait beau = 天气好' },
+        { fr: 'Ma sœur habite à Paris.', zh: '我妹妹住在巴黎。', tip: '生词：sœur=姐妹，habiter=居住' },
+        { fr: 'Nous mangeons à midi.', zh: '我们中午吃饭。', tip: '生词：midi=中午' },
+      ],
+      A2: [
+        { fr: 'Après la pluie, le ciel est bleu.', zh: '雨后天空很蓝。', tip: '生词：après=在…之后' },
+        { fr: 'Mon frère a préparé un dîner délicieux.', zh: '我哥哥准备了一顿美味的晚餐。', tip: '生词：délicieux=美味的' },
+        { fr: 'Le train part à neuf heures moins le quart.', zh: '火车 8:45 出发。', tip: 'moins le quart = 差一刻' },
+        { fr: 'Elle cherche un appartement à louer.', zh: '她在找一套出租公寓。', tip: '生词：chercher=寻找，louer=出租' },
+        { fr: 'Le livre que je lis est passionnant.', zh: '我读的这本书很精彩。', tip: '生词：passionnant=精彩的' },
+      ],
+      B1: [
+        { fr: 'La France compte plus de 67 millions d\'habitants.', zh: '法国人口超过 6700 万。', tip: 'compter = 共计/拥有' },
+        { fr: 'Le vin et le fromage font partie du patrimoine.', zh: '葡萄酒和奶酪是文化遗产的一部分。', tip: 'patrimoine = 遗产' },
+        { fr: 'De plus en plus de jeunes apprennent le chinois.', zh: '越来越多年轻人学习中文。', tip: 'de plus en plus = 越来越' },
+        { fr: 'L\'éducation gratuite est un droit fondamental.', zh: '免费教育是基本权利。', tip: 'fondamental = 基本的' },
+        { fr: 'Le réchauffement climatique menace les océans.', zh: '气候变暖威胁着海洋。', tip: 'menacer = 威胁' },
+      ],
+      B2: [
+        { fr: 'La laïcité demeure un pilier de l\'identité républicaine.', zh: '世俗主义仍是共和认同的支柱。', tip: 'laïcité = 世俗主义' },
+        { fr: 'L\'œuvre questionne le rapport à l\'altérité.', zh: '这部作品质疑与他者的关系。', tip: 'altérité = 他者性' },
+        { fr: 'Le texte déploie une rhétorique de la responsabilité.', zh: '文本展开了关于责任的修辞。', tip: 'rhétorique = 修辞' },
+        { fr: 'On observe un glissement sémantique du terme.', zh: '可观察到该词语义的偏移。', tip: 'sémantique = 语义' },
+        { fr: 'L\'essai dénonce la fracture sociale croissante.', zh: '这篇随笔谴责日益加剧的社会裂痕。', tip: 'fracture = 裂痕' },
+      ],
+    },
+    write: {
+      A1: [
+        { prompt: '写 3 句话介绍你自己（名字、来自哪里、喜欢什么）。', model: 'Je m\'appelle... Je viens de... J\'aime...', vocab: 'venir de = 来自' },
+        { prompt: '写写你今天的早餐（2-3 句）。', model: 'Ce matin, j\'ai mangé... et bu...', vocab: 'petit-déjeuner = 早餐' },
+        { prompt: '用「J\'adore...」写 2 样你喜欢的东西。', model: 'J\'adore le chocolat et les films français.', vocab: 'adorer = 喜爱' },
+        { prompt: '用「Je veux...」写 2 个你的愿望。', model: 'Je veux voyager en France un jour.', vocab: 'voyager = 旅行' },
+        { prompt: '写一句今天的天气和你的心情。', model: 'Il fait beau et je suis heureux.', vocab: 'heureux = 开心的' },
+      ],
+      A2: [
+        { prompt: '用复合过去时写 3 句你上周做过的事。', model: 'La semaine dernière, je suis allé... j\'ai lu... j\'ai cuisiné...', vocab: 'la semaine dernière = 上周' },
+        { prompt: '写一段约 50 字的餐厅点餐对话。', model: '- Je voudrais un steak, s\'il vous plaît. - Très bien, et comme boisson ?', vocab: 'commander = 点餐' },
+        { prompt: '描述你现在住的地方（2-3 句）。', model: 'J\'habite un petit appartement. Il y a une cuisine et une chambre.', vocab: 'appartement = 公寓' },
+        { prompt: '用 « si + imparfait » 写 2 个假设。', model: 'Si j\'avais plus de temps, je lirais davantage.', vocab: 'si = 如果' },
+        { prompt: '写 2 句你对环保的看法。', model: 'Il faut protéger la nature. On doit recycler.', vocab: 'protéger = 保护' },
+      ],
+      B1: [
+        { prompt: '就「是否应该少开车」写一段约 80 字的观点。', model: 'À mon avis, il faut prendre les transports en commun pour réduire la pollution.', vocab: 'voiture = 汽车' },
+        { prompt: '用连接词写一段对比两座城市的文字。', model: 'D\'une part Paris est vaste, d\'autre part Lyon est plus calme.', vocab: 'comparer = 比较' },
+        { prompt: '写一封约 60 字的正式邮件预约见面。', model: 'Madame, Monsieur, je souhaiterais fixer un rendez-vous la semaine prochaine.', vocab: 'rendez-vous = 预约' },
+        { prompt: '用条件式写 2 句你对未来的设想。', model: 'Si j\'avais un jardin, je planterais des fleurs.', vocab: 'futur = 未来' },
+        { prompt: '写 3 句你最近读的一本书的感想。', model: 'Ce livre parle de l\'amitié. L\'auteur écrit simplement. Je le recommande.', vocab: 'auteur = 作者' },
+      ],
+      B2: [
+        { prompt: '写一篇约 120 字的议论文引言（抛出论点+背景）。', model: 'Dans un monde où l\'information circule vite, il convient de défendre une thèse claire.', vocab: 'thèse = 论点' },
+        { prompt: '用近义词替换重写给定句子练习（important → essentiel）。', model: 'Ce point est essentiel pour la suite.', vocab: 'synonyme = 近义词' },
+        { prompt: '写一段约 80 字反驳某个观点。', model: 'Au contraire, je soutiens que cette réforme aggrave les inégalités.', vocab: 'réfuter = 反驳' },
+        { prompt: '就媒体与信息写一篇约 100 字评论。', model: 'Les médias doivent lutter contre la désinformation et vérifier les faits.', vocab: 'désinformation = 虚假信息' },
+        { prompt: '用 « bien que + 虚拟式 » 写 2 句。', model: 'Bien que le sujet soit complexe, nous devons agir.', vocab: 'subjonctif = 虚拟式' },
+      ],
     },
   };
+
+  // 为每个素材生成稳定 id（skill-level-index），保证跨天可复现进度
+  const SKILL_CONTENT = {};
+  SKILLS.forEach((s) => {
+    SKILL_CONTENT[s.key] = {};
+    Object.keys(SKILL_RAW[s.key]).forEach((lv) => {
+      SKILL_CONTENT[s.key][lv] = SKILL_RAW[s.key][lv].map((it, i) => Object.assign({ id: s.key + '-' + lv + '-' + i }, it));
+    });
+  });
+
+  function skillPool(skill, level) {
+    const bank = SKILL_CONTENT[skill] || {};
+    return bank[level] || bank.B2 || [];
+  }
+
+  // 按日期确定性轮排：每个技能独立的偏移种子，保证四模块内容不同步
+  function dailySkillItems(skill, dateStr, level, n) {
+    const pool = skillPool(skill, level);
+    if (!pool.length) return [];
+    const ep = Math.floor(Date.parse(dateStr + 'T00:00:00') / 86400000);
+    const seed = { listen: 1, speak: 2, read: 3, write: 4 }[skill] || 0;
+    const start = (((ep + seed) % pool.length) + pool.length) % pool.length;
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(pool[(start + i) % pool.length]);
+    return out;
+  }
+
+  // 每天每项技能的素材条数（即进度分母）
+  function skillTotals(dateStr, level) {
+    const o = {};
+    SKILLS.forEach((s) => { o[s.key] = s.perDay; });
+    return o;
+  }
 
   // 随堂测试题库（MCQ）。answer 为正确选项索引
   const QUIZ = {
@@ -136,19 +287,6 @@
     return out;
   }
 
-  // 生成听说读任务（各取 1 条）
-  function genTasks(key) {
-    const pick = (bank) => {
-      const arr = bank[key] || bank.A1;
-      return arr[Math.floor(Math.random() * arr.length)];
-    };
-    return {
-      listen: pick(TASK_BANK.listen),
-      speak: pick(TASK_BANK.speak),
-      read: pick(TASK_BANK.read),
-    };
-  }
-
   // 生成随堂测试（n 题）
   function genQuiz(key, n) {
     n = n || 4;
@@ -156,5 +294,5 @@
     return shuffle(pool).slice(0, Math.min(n, pool.length));
   }
 
-  global.French = { LEVELS, getLevel, lessonTopics, genTasks, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos };
+  global.French = { LEVELS, getLevel, lessonTopics, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos, SKILLS, dailySkillItems, skillTotals };
 })(window);

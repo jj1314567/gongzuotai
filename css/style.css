@@ -678,3 +678,50 @@ input, textarea, select { font-family: inherit; }
   .checkin-card .check-circle { width: 32px; height: 32px; }
 }
 
+
+/* ============ 法语 · 听说读写四项技能 ============ */
+.fr-overall { padding: 16px 18px; margin-bottom: 18px; }
+.fr-overall.done { border-color: var(--primary); background: var(--primary-soft); }
+.fr-overall-top { display: flex; justify-content: space-between; align-items: center; font-weight: 700; margin-bottom: 10px; }
+.fr-overall-pct { color: var(--primary); font-variant-numeric: tabular-nums; }
+
+/* 进度条：类 B站 视频进度（部分填充） */
+.fr-progress { height: 9px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.fr-progress.big { height: 14px; }
+.fr-progress > i { display: block; height: 100%; width: 0;
+  background: linear-gradient(90deg, #7c5cff, #a78bfa); border-radius: 999px;
+  transition: width .4s cubic-bezier(.22,.61,.36,1); }
+.fr-progress.done > i { background: linear-gradient(90deg, #16a34a, #4ade80); }
+
+.fr-skills { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+.fr-skill { padding: 15px 16px; }
+.fr-skill.done { border-color: var(--primary); background: var(--primary-soft); }
+.fr-skill-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.fr-skill-ico { font-size: 20px; }
+.fr-skill-name { font-weight: 800; flex: 1; }
+.fr-skill-pct { font-size: 12px; font-weight: 700; color: var(--text-soft); font-variant-numeric: tabular-nums; }
+
+.fr-items { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+.fr-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px;
+  background: var(--card-solid); border: 1px solid var(--border); border-radius: 13px; }
+.fr-item.done { border-color: var(--primary); background: var(--primary-soft); }
+.fr-item-main { flex: 1; min-width: 0; }
+.fr-item-fr { display: flex; align-items: center; gap: 8px; }
+.fr-fr-text { font-weight: 700; font-size: 15px; color: var(--text); }
+.fr-item-zh { font-size: 13px; color: var(--text-soft); margin-top: 2px; }
+.fr-item-tip { font-size: 12px; color: var(--primary); margin-top: 4px; }
+.fr-item-q { font-weight: 700; font-size: 14px; color: var(--text); line-height: 1.5; }
+.fr-tts { flex-shrink: 0; width: 34px; height: 34px; font-size: 16px; padding: 0;
+  border-radius: 10px; background: var(--primary-soft); border: 1px solid var(--border); }
+.fr-write { width: 100%; min-height: 64px; margin-top: 8px; resize: vertical;
+  border: 1px solid var(--border); border-radius: 10px; padding: 9px 11px;
+  font: inherit; font-size: 13.5px; line-height: 1.5; background: var(--card-solid); color: var(--text); }
+.fr-write:focus { outline: none; border-color: var(--primary); }
+.fr-ex { margin-top: 8px; font-size: 13px; }
+.fr-ex summary { cursor: pointer; color: var(--primary); font-weight: 700; user-select: none; }
+.fr-ex-body { margin-top: 6px; padding: 8px 11px; background: var(--card-solid); border-radius: 9px;
+  color: var(--text-soft); line-height: 1.55; border: 1px dashed var(--border); }
+
+@media (max-width: 720px) {
+  .fr-skills { grid-template-columns: 1fr; }
+}
