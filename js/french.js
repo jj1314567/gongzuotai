@@ -198,6 +198,36 @@
     return o;
   }
 
+  /* ---------------- 每模块一键跳转跟学视频（B站/小红书/抖音）----------------
+     纯前端无法实时抓取各平台热门榜（跨域限制），
+     故按技能给「热门跟学关键词池」，每天从池中轮排一个主题，
+     并生成 B站 / 小红书 / 抖音 三个平台的搜索链接——点开即是最新的热门视频。 */
+  const PLATFORMS = [
+    { key: 'bili', name: 'B站', build: (kw) => 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(kw) },
+    { key: 'xhs', name: '小红书', build: (kw) => 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(kw) },
+    { key: 'dy', name: '抖音', build: (kw) => 'https://www.douyin.com/search/' + encodeURIComponent(kw) },
+  ];
+
+  const SKILL_VIDEO_KW = {
+    listen: ['法语听力 精听跟读', '法语泛听 磨耳朵', '法语听力训练 每日', '法语影视 无字幕精听'],
+    speak: ['法语口语 跟读模仿', '法语日常口语 100句', '法语发音 纠音练习', '法语情景对话 实战'],
+    read: ['法语阅读 外刊精读', '法语分级读物 推荐', '法语长难句 拆解', '法语原版书 共读'],
+    write: ['法语写作 万能模板', '法语作文 高频句型', '法语书信 写法', '法语观点表达 句式'],
+  };
+
+  function skillVideoKw(skill, dateStr) {
+    const kws = SKILL_VIDEO_KW[skill] || [];
+    if (!kws.length) return '';
+    const ep = Math.floor(Date.parse(dateStr + 'T00:00:00') / 86400000);
+    return kws[((ep % kws.length) + kws.length) % kws.length];
+  }
+
+  // 返回该技能当日的热门主题 + 三个平台跳转链接
+  function skillVideoUrls(skill, dateStr) {
+    const kw = skillVideoKw(skill, dateStr);
+    return PLATFORMS.map((p) => ({ key: p.key, name: p.name, kw: kw, url: p.build(kw) }));
+  }
+
   // 随堂测试题库（MCQ）。answer 为正确选项索引
   const QUIZ = {
     A1: [
@@ -294,5 +324,5 @@
     return shuffle(pool).slice(0, Math.min(n, pool.length));
   }
 
-  global.French = { LEVELS, getLevel, lessonTopics, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos, SKILLS, dailySkillItems, skillTotals };
+  global.French = { LEVELS, getLevel, lessonTopics, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos, SKILLS, dailySkillItems, skillTotals, PLATFORMS, SKILL_VIDEO_KW, skillVideoKw, skillVideoUrls };
 })(window);

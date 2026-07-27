@@ -741,6 +741,14 @@ input, textarea, select { font-family: inherit; }
   .fr-skills { grid-template-columns: 1fr; }
 }
 
+/* 每模块「今日跟学视频」一键跳转行 */
+.fr-video-row { margin-top: 12px; padding-top: 11px; border-top: 1px dashed var(--border); }
+.fr-video-row-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.fr-video-row-top > span:first-child { font-weight: 700; font-size: 13px; }
+.fr-video-kw { font-size: 12px; color: var(--primary); font-weight: 700; text-align: right; }
+.fr-video-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.jump-btn.sm { padding: 6px 11px; font-size: 12.5px; }
+
 </style>
 </head>
 <body>
@@ -1790,6 +1798,36 @@ input, textarea, select { font-family: inherit; }
     return o;
   }
 
+  /* ---------------- 每模块一键跳转跟学视频（B站/小红书/抖音）----------------
+     纯前端无法实时抓取各平台热门榜（跨域限制），
+     故按技能给「热门跟学关键词池」，每天从池中轮排一个主题，
+     并生成 B站 / 小红书 / 抖音 三个平台的搜索链接——点开即是最新的热门视频。 */
+  const PLATFORMS = [
+    { key: 'bili', name: 'B站', build: (kw) => 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(kw) },
+    { key: 'xhs', name: '小红书', build: (kw) => 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(kw) },
+    { key: 'dy', name: '抖音', build: (kw) => 'https://www.douyin.com/search/' + encodeURIComponent(kw) },
+  ];
+
+  const SKILL_VIDEO_KW = {
+    listen: ['法语听力 精听跟读', '法语泛听 磨耳朵', '法语听力训练 每日', '法语影视 无字幕精听'],
+    speak: ['法语口语 跟读模仿', '法语日常口语 100句', '法语发音 纠音练习', '法语情景对话 实战'],
+    read: ['法语阅读 外刊精读', '法语分级读物 推荐', '法语长难句 拆解', '法语原版书 共读'],
+    write: ['法语写作 万能模板', '法语作文 高频句型', '法语书信 写法', '法语观点表达 句式'],
+  };
+
+  function skillVideoKw(skill, dateStr) {
+    const kws = SKILL_VIDEO_KW[skill] || [];
+    if (!kws.length) return '';
+    const ep = Math.floor(Date.parse(dateStr + 'T00:00:00') / 86400000);
+    return kws[((ep % kws.length) + kws.length) % kws.length];
+  }
+
+  // 返回该技能当日的热门主题 + 三个平台跳转链接
+  function skillVideoUrls(skill, dateStr) {
+    const kw = skillVideoKw(skill, dateStr);
+    return PLATFORMS.map((p) => ({ key: p.key, name: p.name, kw: kw, url: p.build(kw) }));
+  }
+
   // 随堂测试题库（MCQ）。answer 为正确选项索引
   const QUIZ = {
     A1: [
@@ -1886,7 +1924,7 @@ input, textarea, select { font-family: inherit; }
     return shuffle(pool).slice(0, Math.min(n, pool.length));
   }
 
-  global.French = { LEVELS, getLevel, lessonTopics, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos, SKILLS, dailySkillItems, skillTotals };
+  global.French = { LEVELS, getLevel, lessonTopics, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos, SKILLS, dailySkillItems, skillTotals, PLATFORMS, SKILL_VIDEO_KW, skillVideoKw, skillVideoUrls };
 })(window);
 
 </script>
@@ -2602,10 +2640,6 @@ input, textarea, select { font-family: inherit; }
     const lvl = French.getLevel(S.DB.french.level);
     const topics = French.lessonTopics(lvl.key);
     const frVideos = S.DB.french.videos || [];
-    const videos = French.dailyVideos(ui.frenchDate, S.DB.french.level);
-    const frRec0 = S.getFrench(ui.frenchDate) || {};
-    const studiedMap = {};
-    (frRec0.videos || []).forEach((v) => { studiedMap[v.id] = v.studied; });
     const lessons = topics.map((t, i) => {
       const v = frVideos.find((x) => x.topic === t);
       return `<div class="fr-lesson">
@@ -2630,12 +2664,14 @@ input, textarea, select { font-family: inherit; }
     const overallPct = totAll ? Math.round((totDone / totAll) * 100) : 0;
     const allDone = overallPct === 100;
 
-    // 渲染单个技能卡片（含具体素材 + 进度条）
+    // 渲染单个技能卡片（含具体素材 + 进度条 + 一键跟学视频）
     const renderSkill = (skill) => {
       const total = totals[skill.key];
       const items = French.dailySkillItems(skill.key, ui.frenchDate, S.DB.french.level, total);
       const prog = S.frenchSkillProgress(ui.frenchDate, skill.key, total);
       const pct = prog.pct;
+      const videoKw = French.skillVideoKw(skill.key, ui.frenchDate);
+      const videoUrls = French.skillVideoUrls(skill.key, ui.frenchDate);
       const itemsHTML = items.map((it) => {
         const st = S.getFrenchSkillItem(ui.frenchDate, skill.key, it.id);
         const done = !!(st && st.done);
@@ -2670,6 +2706,12 @@ input, textarea, select { font-family: inherit; }
         </div>
         <div class="fr-progress ${pct === 100 ? 'done' : ''}"><i style="width:${pct}%"></i></div>
         <div class="fr-items">${itemsHTML}</div>
+        <div class="fr-video-row">
+          <div class="fr-video-row-top"><span>📺 今日跟学视频</span><span class="fr-video-kw">${esc(videoKw)}</span></div>
+          <div class="fr-video-btns">
+            ${videoUrls.map((p) => jumpBtn(p.url, '▶ ' + p.name).replace('class="jump-btn"', 'class="jump-btn sm"')).join('')}
+          </div>
+        </div>
       </div>`;
     };
 
@@ -2700,26 +2742,6 @@ input, textarea, select { font-family: inherit; }
         </div>
         <div class="sec-title">📚 课程表（可添加自己的教学视频）</div>
         <div class="task-list">${lessons}</div>
-      </div>
-
-      <div class="card" style="margin-bottom:18px">
-        <div class="sec-title">📺 延伸跟学 · B站热门法语</div>
-        <p class="muted" style="margin:2px 0 10px">听力/口语的扩展素材：点「一键跟学」直接开练并打卡，或跳转 B站看原视频。每天自动换一批。</p>
-        <div class="task-list">
-          ${videos.map((v) => {
-            const done = !!studiedMap[v.id];
-            return `<div class="fr-video ${done ? 'done' : ''}">
-              <div class="habit-main" style="flex:1;min-width:0">
-                <div class="habit-name">${esc(v.title)} ${done ? '<span class="tag-ok">✓ 已学</span>' : ''}</div>
-                <div class="habit-meta">${esc(v.desc)} · <span class="lv">${v.tag}</span></div>
-              </div>
-              <div class="fr-video-actions">
-                <button class="btn ${done ? 'ghost sm' : 'sm'}" data-action="fr-video-study" data-id="${esc(v.id)}">${done ? '↻ 再看' : '▶ 一键跟学'}</button>
-                ${jumpBtn(French.biliSearchUrl(v.kw), '🔗 跳转B站原视频').replace('jump-btn', 'jump-btn sm')}
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
       </div>
 
       <div class="fr-skills">
@@ -3056,13 +3078,6 @@ input, textarea, select { font-family: inherit; }
       case 'fr-newquiz': { const r = S.getFrench(ui.frenchDate) || {}; r.quiz = French.genQuiz(S.DB.french.level, 4); S.recordFrench(ui.frenchDate, r); renderFrench(); break; }
       case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o); break;
       case 'fr-add-video': frAddVideoModal(t.dataset.topic); break;
-      // 法语每日跟学：一键开练（跳转 B站并打卡）
-      case 'fr-video-study': {
-        const v = French.dailyVideos(ui.frenchDate, S.DB.french.level).find((x) => x.id === t.dataset.id);
-        if (v) { try { window.open(French.biliSearchUrl(v.kw), '_blank'); } catch (e) {} }
-        S.setFrenchVideo(ui.frenchDate, t.dataset.id, true);
-        toast('已开始跟学 ✓'); renderFrench(); break;
-      }
       // 日历
       case 'cal-prev': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() - 1, 1); renderCalendar(); break;
       case 'cal-next': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + 1, 1); renderCalendar(); break;

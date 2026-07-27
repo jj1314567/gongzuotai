@@ -482,10 +482,6 @@
     const lvl = French.getLevel(S.DB.french.level);
     const topics = French.lessonTopics(lvl.key);
     const frVideos = S.DB.french.videos || [];
-    const videos = French.dailyVideos(ui.frenchDate, S.DB.french.level);
-    const frRec0 = S.getFrench(ui.frenchDate) || {};
-    const studiedMap = {};
-    (frRec0.videos || []).forEach((v) => { studiedMap[v.id] = v.studied; });
     const lessons = topics.map((t, i) => {
       const v = frVideos.find((x) => x.topic === t);
       return `<div class="fr-lesson">
@@ -510,12 +506,14 @@
     const overallPct = totAll ? Math.round((totDone / totAll) * 100) : 0;
     const allDone = overallPct === 100;
 
-    // 渲染单个技能卡片（含具体素材 + 进度条）
+    // 渲染单个技能卡片（含具体素材 + 进度条 + 一键跟学视频）
     const renderSkill = (skill) => {
       const total = totals[skill.key];
       const items = French.dailySkillItems(skill.key, ui.frenchDate, S.DB.french.level, total);
       const prog = S.frenchSkillProgress(ui.frenchDate, skill.key, total);
       const pct = prog.pct;
+      const videoKw = French.skillVideoKw(skill.key, ui.frenchDate);
+      const videoUrls = French.skillVideoUrls(skill.key, ui.frenchDate);
       const itemsHTML = items.map((it) => {
         const st = S.getFrenchSkillItem(ui.frenchDate, skill.key, it.id);
         const done = !!(st && st.done);
@@ -550,6 +548,12 @@
         </div>
         <div class="fr-progress ${pct === 100 ? 'done' : ''}"><i style="width:${pct}%"></i></div>
         <div class="fr-items">${itemsHTML}</div>
+        <div class="fr-video-row">
+          <div class="fr-video-row-top"><span>📺 今日跟学视频</span><span class="fr-video-kw">${esc(videoKw)}</span></div>
+          <div class="fr-video-btns">
+            ${videoUrls.map((p) => jumpBtn(p.url, '▶ ' + p.name).replace('class="jump-btn"', 'class="jump-btn sm"')).join('')}
+          </div>
+        </div>
       </div>`;
     };
 
@@ -580,26 +584,6 @@
         </div>
         <div class="sec-title">📚 课程表（可添加自己的教学视频）</div>
         <div class="task-list">${lessons}</div>
-      </div>
-
-      <div class="card" style="margin-bottom:18px">
-        <div class="sec-title">📺 延伸跟学 · B站热门法语</div>
-        <p class="muted" style="margin:2px 0 10px">听力/口语的扩展素材：点「一键跟学」直接开练并打卡，或跳转 B站看原视频。每天自动换一批。</p>
-        <div class="task-list">
-          ${videos.map((v) => {
-            const done = !!studiedMap[v.id];
-            return `<div class="fr-video ${done ? 'done' : ''}">
-              <div class="habit-main" style="flex:1;min-width:0">
-                <div class="habit-name">${esc(v.title)} ${done ? '<span class="tag-ok">✓ 已学</span>' : ''}</div>
-                <div class="habit-meta">${esc(v.desc)} · <span class="lv">${v.tag}</span></div>
-              </div>
-              <div class="fr-video-actions">
-                <button class="btn ${done ? 'ghost sm' : 'sm'}" data-action="fr-video-study" data-id="${esc(v.id)}">${done ? '↻ 再看' : '▶ 一键跟学'}</button>
-                ${jumpBtn(French.biliSearchUrl(v.kw), '🔗 跳转B站原视频').replace('jump-btn', 'jump-btn sm')}
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
       </div>
 
       <div class="fr-skills">
@@ -936,13 +920,6 @@
       case 'fr-newquiz': { const r = S.getFrench(ui.frenchDate) || {}; r.quiz = French.genQuiz(S.DB.french.level, 4); S.recordFrench(ui.frenchDate, r); renderFrench(); break; }
       case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o); break;
       case 'fr-add-video': frAddVideoModal(t.dataset.topic); break;
-      // 法语每日跟学：一键开练（跳转 B站并打卡）
-      case 'fr-video-study': {
-        const v = French.dailyVideos(ui.frenchDate, S.DB.french.level).find((x) => x.id === t.dataset.id);
-        if (v) { try { window.open(French.biliSearchUrl(v.kw), '_blank'); } catch (e) {} }
-        S.setFrenchVideo(ui.frenchDate, t.dataset.id, true);
-        toast('已开始跟学 ✓'); renderFrench(); break;
-      }
       // 日历
       case 'cal-prev': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() - 1, 1); renderCalendar(); break;
       case 'cal-next': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + 1, 1); renderCalendar(); break;
