@@ -196,6 +196,15 @@
     save();
     return r.done;
   }
+  function setFrenchVideo(date, id, studied) {
+    const r = DB.french.records[date] || {};
+    r.videos = r.videos || [];
+    let it = r.videos.find((x) => x.id === id);
+    if (!it) { it = { id: id }; r.videos.push(it); }
+    it.studied = studied;
+    DB.french.records[date] = r;
+    save();
+  }
 
   /* ---------- 主题 ---------- */
   function setTheme(t) { DB.settings.theme = t; save(); applyTheme(); }
@@ -253,7 +262,7 @@
     addRecipe, updateRecipe, removeRecipe,
     upsertDiary, getDiary, removeDiary,
     addPlan, updatePlan, removePlan, plansOn,
-    setFrenchLevel, recordFrench, getFrench, frenchDone, toggleFrench,
+    setFrenchLevel, recordFrench, getFrench, frenchDone, toggleFrench, setFrenchVideo,
     setTheme, applyTheme,
     isTeaFav, toggleTeaFav, setTeaDay, clearTeaDay, getTeaPlan,
     todaySummary, exportData, importData,

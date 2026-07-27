@@ -100,6 +100,42 @@
   function getLevel(key) { return LEVELS.find((l) => l.key === key) || LEVELS[0]; }
   function lessonTopics(key) { return LESSON_TOPICS[key] || []; }
 
+  /* ---------------- 每日跟学 · B站热门法语 ----------------
+     说明：纯前端无法实时抓取 B站热门榜（接口有跨域限制），
+     故用「热门法语学习主题池」按日期自动轮排成每日计划，
+     每条都跳转到 B站对应主题搜索页（即按热度排序的相关视频）。 */
+  const VIDEO_TOPICS = [
+    { id: 'v-fayin', title: '法语发音入门（元音/辅音）', tag: 'A1', desc: '跟练标准法语发音', kw: '法语发音入门' },
+    { id: 'v-richang', title: '法语日常会话 100 句', tag: 'A1', desc: '高频实用口语', kw: '法语日常会话' },
+    { id: 'v-ertong', title: '法语儿歌 / 动画（轻松入门）', tag: 'A1', desc: '兴趣驱动磨耳朵', kw: '法语儿歌' },
+    { id: 'v-yinbiao', title: '法语音标跟读', tag: 'A1', desc: '音准训练', kw: '法语音标' },
+    { id: 'v-yufa', title: '法语基础语法（时态/性数）', tag: 'A2', desc: '搭建语法框架', kw: '法语基础语法' },
+    { id: 'v-tingli', title: '法语听力训练', tag: 'A2', desc: '每日泛听', kw: '法语听力训练' },
+    { id: 'v-cihui', title: '法语核心词汇 2000', tag: 'A2', desc: '高频词积累', kw: '法语词汇' },
+    { id: 'v-kouyu', title: '法语口语情景对话', tag: 'A2', desc: '开口说', kw: '法语口语' },
+    { id: 'v-podcast', title: '法语 Podcast 听力', tag: 'B1', desc: '进阶听力', kw: '法语podcast' },
+    { id: 'v-jingting', title: '法语影视精听', tag: 'B1', desc: '跟读原声', kw: '法语影视 精听' },
+    { id: 'v-bianlun', title: '法语辩论与观点表达', tag: 'B2', desc: '思辨输出', kw: '法语辩论' },
+    { id: 'v-xinwen', title: '法语新闻听力', tag: 'B2', desc: '真实语料', kw: '法语新闻 听力' },
+  ];
+
+  function biliSearchUrl(kw) {
+    return 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(kw);
+  }
+
+  // 按日期确定性轮排：优先匹配用户当前等级，再补其它，每天换一批
+  function dailyVideos(dateStr, level) {
+    const ep = Math.floor(Date.parse(dateStr + 'T00:00:00') / 86400000);
+    const matched = VIDEO_TOPICS.filter((t) => t.tag === level);
+    const others = VIDEO_TOPICS.filter((t) => t.tag !== level);
+    const pool = matched.length ? matched.concat(others) : VIDEO_TOPICS.slice();
+    const n = 3;
+    const start = ((ep % pool.length) + pool.length) % pool.length;
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(pool[(start + i) % pool.length]);
+    return out;
+  }
+
   // 生成听说读任务（各取 1 条）
   function genTasks(key) {
     const pick = (bank) => {
@@ -120,5 +156,5 @@
     return shuffle(pool).slice(0, Math.min(n, pool.length));
   }
 
-  global.French = { LEVELS, getLevel, lessonTopics, genTasks, genQuiz, shuffle };
+  global.French = { LEVELS, getLevel, lessonTopics, genTasks, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos };
 })(window);

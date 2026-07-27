@@ -469,6 +469,10 @@
     const lvl = French.getLevel(S.DB.french.level);
     const topics = French.lessonTopics(lvl.key);
     const frVideos = S.DB.french.videos || [];
+    const videos = French.dailyVideos(ui.frenchDate, S.DB.french.level);
+    const frRec0 = S.getFrench(ui.frenchDate) || {};
+    const studiedMap = {};
+    (frRec0.videos || []).forEach((v) => { studiedMap[v.id] = v.studied; });
     const lessons = topics.map((t, i) => {
       const v = frVideos.find((x) => x.topic === t);
       return `<div class="fr-lesson">
@@ -514,6 +518,26 @@
         </div>
         <div class="sec-title">📚 课程表（可添加自己的教学视频）</div>
         <div class="task-list">${lessons}</div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <div class="sec-title">📺 今日跟学 · B站热门法语</div>
+        <p class="muted" style="margin:2px 0 10px">按你的等级自动排好，点「一键跟学」直接开练并打卡，或跳转 B站看原视频。每天自动换一批。</p>
+        <div class="task-list">
+          ${videos.map((v) => {
+            const done = !!studiedMap[v.id];
+            return `<div class="fr-video ${done ? 'done' : ''}">
+              <div class="habit-main" style="flex:1;min-width:0">
+                <div class="habit-name">${esc(v.title)} ${done ? '<span class="tag-ok">✓ 已学</span>' : ''}</div>
+                <div class="habit-meta">${esc(v.desc)} · <span class="lv">${v.tag}</span></div>
+              </div>
+              <div class="fr-video-actions">
+                <button class="btn ${done ? 'ghost sm' : 'sm'}" data-action="fr-video-study" data-id="${esc(v.id)}">${done ? '↻ 再看' : '▶ 一键跟学'}</button>
+                ${jumpBtn(French.biliSearchUrl(v.kw), '🔗 跳转B站原视频').replace('jump-btn', 'jump-btn sm')}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
       </div>
 
       <div class="grid grid-2">
@@ -862,6 +886,13 @@
       case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o); break;
       case 'fr-toggle': { const on = S.toggleFrench(ui.frenchDate); toast(on ? '已标记今日有学 ✓' : '已取消'); refreshTop(); renderFrench(); break; }
       case 'fr-add-video': frAddVideoModal(t.dataset.topic); break;
+      // 法语每日跟学：一键开练（跳转 B站并打卡）
+      case 'fr-video-study': {
+        const v = French.dailyVideos(ui.frenchDate, S.DB.french.level).find((x) => x.id === t.dataset.id);
+        if (v) { try { window.open(French.biliSearchUrl(v.kw), '_blank'); } catch (e) {} }
+        S.setFrenchVideo(ui.frenchDate, t.dataset.id, true);
+        toast('已开始跟学 ✓'); renderFrench(); break;
+      }
       // 日历
       case 'cal-prev': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() - 1, 1); renderCalendar(); break;
       case 'cal-next': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + 1, 1); renderCalendar(); break;

@@ -409,6 +409,10 @@ input, textarea, select { font-family: inherit; }
 .fr-level { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .fr-lesson { display: flex; align-items: center; gap: 12px; padding: 13px; background: var(--card-solid); border: 1px solid var(--border); border-radius: 14px; }
 .fr-lesson .lv { font-size: 12px; font-weight: 800; color: #fff; background: var(--primary); padding: 3px 9px; border-radius: 999px; }
+.fr-video { display: flex; align-items: center; gap: 12px; padding: 13px; background: var(--card-solid); border: 1px solid var(--border); border-radius: 14px; }
+.fr-video.done { border-color: var(--primary); background: var(--primary-soft); }
+.fr-video-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.tag-ok { font-size: 11px; font-weight: 800; color: #fff; background: #16a34a; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
 .task-list { display: flex; flex-direction: column; gap: 10px; }
 .task { display: flex; align-items: flex-start; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 14px; background: var(--card-solid); }
 .task .tk { font-size: 18px; }
@@ -958,6 +962,15 @@ input, textarea, select { font-family: inherit; }
     save();
     return r.done;
   }
+  function setFrenchVideo(date, id, studied) {
+    const r = DB.french.records[date] || {};
+    r.videos = r.videos || [];
+    let it = r.videos.find((x) => x.id === id);
+    if (!it) { it = { id: id }; r.videos.push(it); }
+    it.studied = studied;
+    DB.french.records[date] = r;
+    save();
+  }
 
   /* ---------- 主题 ---------- */
   function setTheme(t) { DB.settings.theme = t; save(); applyTheme(); }
@@ -1015,7 +1028,7 @@ input, textarea, select { font-family: inherit; }
     addRecipe, updateRecipe, removeRecipe,
     upsertDiary, getDiary, removeDiary,
     addPlan, updatePlan, removePlan, plansOn,
-    setFrenchLevel, recordFrench, getFrench, frenchDone, toggleFrench,
+    setFrenchLevel, recordFrench, getFrench, frenchDone, toggleFrench, setFrenchVideo,
     setTheme, applyTheme,
     isTeaFav, toggleTeaFav, setTeaDay, clearTeaDay, getTeaPlan,
     todaySummary, exportData, importData,
@@ -1565,6 +1578,42 @@ input, textarea, select { font-family: inherit; }
   function getLevel(key) { return LEVELS.find((l) => l.key === key) || LEVELS[0]; }
   function lessonTopics(key) { return LESSON_TOPICS[key] || []; }
 
+  /* ---------------- 每日跟学 · B站热门法语 ----------------
+     说明：纯前端无法实时抓取 B站热门榜（接口有跨域限制），
+     故用「热门法语学习主题池」按日期自动轮排成每日计划，
+     每条都跳转到 B站对应主题搜索页（即按热度排序的相关视频）。 */
+  const VIDEO_TOPICS = [
+    { id: 'v-fayin', title: '法语发音入门（元音/辅音）', tag: 'A1', desc: '跟练标准法语发音', kw: '法语发音入门' },
+    { id: 'v-richang', title: '法语日常会话 100 句', tag: 'A1', desc: '高频实用口语', kw: '法语日常会话' },
+    { id: 'v-ertong', title: '法语儿歌 / 动画（轻松入门）', tag: 'A1', desc: '兴趣驱动磨耳朵', kw: '法语儿歌' },
+    { id: 'v-yinbiao', title: '法语音标跟读', tag: 'A1', desc: '音准训练', kw: '法语音标' },
+    { id: 'v-yufa', title: '法语基础语法（时态/性数）', tag: 'A2', desc: '搭建语法框架', kw: '法语基础语法' },
+    { id: 'v-tingli', title: '法语听力训练', tag: 'A2', desc: '每日泛听', kw: '法语听力训练' },
+    { id: 'v-cihui', title: '法语核心词汇 2000', tag: 'A2', desc: '高频词积累', kw: '法语词汇' },
+    { id: 'v-kouyu', title: '法语口语情景对话', tag: 'A2', desc: '开口说', kw: '法语口语' },
+    { id: 'v-podcast', title: '法语 Podcast 听力', tag: 'B1', desc: '进阶听力', kw: '法语podcast' },
+    { id: 'v-jingting', title: '法语影视精听', tag: 'B1', desc: '跟读原声', kw: '法语影视 精听' },
+    { id: 'v-bianlun', title: '法语辩论与观点表达', tag: 'B2', desc: '思辨输出', kw: '法语辩论' },
+    { id: 'v-xinwen', title: '法语新闻听力', tag: 'B2', desc: '真实语料', kw: '法语新闻 听力' },
+  ];
+
+  function biliSearchUrl(kw) {
+    return 'https://search.bilibili.com/all?keyword=' + encodeURIComponent(kw);
+  }
+
+  // 按日期确定性轮排：优先匹配用户当前等级，再补其它，每天换一批
+  function dailyVideos(dateStr, level) {
+    const ep = Math.floor(Date.parse(dateStr + 'T00:00:00') / 86400000);
+    const matched = VIDEO_TOPICS.filter((t) => t.tag === level);
+    const others = VIDEO_TOPICS.filter((t) => t.tag !== level);
+    const pool = matched.length ? matched.concat(others) : VIDEO_TOPICS.slice();
+    const n = 3;
+    const start = ((ep % pool.length) + pool.length) % pool.length;
+    const out = [];
+    for (let i = 0; i < n; i++) out.push(pool[(start + i) % pool.length]);
+    return out;
+  }
+
   // 生成听说读任务（各取 1 条）
   function genTasks(key) {
     const pick = (bank) => {
@@ -1585,7 +1634,7 @@ input, textarea, select { font-family: inherit; }
     return shuffle(pool).slice(0, Math.min(n, pool.length));
   }
 
-  global.French = { LEVELS, getLevel, lessonTopics, genTasks, genQuiz, shuffle };
+  global.French = { LEVELS, getLevel, lessonTopics, genTasks, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos };
 })(window);
 
 </script>
@@ -2288,6 +2337,10 @@ input, textarea, select { font-family: inherit; }
     const lvl = French.getLevel(S.DB.french.level);
     const topics = French.lessonTopics(lvl.key);
     const frVideos = S.DB.french.videos || [];
+    const videos = French.dailyVideos(ui.frenchDate, S.DB.french.level);
+    const frRec0 = S.getFrench(ui.frenchDate) || {};
+    const studiedMap = {};
+    (frRec0.videos || []).forEach((v) => { studiedMap[v.id] = v.studied; });
     const lessons = topics.map((t, i) => {
       const v = frVideos.find((x) => x.topic === t);
       return `<div class="fr-lesson">
@@ -2333,6 +2386,26 @@ input, textarea, select { font-family: inherit; }
         </div>
         <div class="sec-title">📚 课程表（可添加自己的教学视频）</div>
         <div class="task-list">${lessons}</div>
+      </div>
+
+      <div class="card" style="margin-bottom:18px">
+        <div class="sec-title">📺 今日跟学 · B站热门法语</div>
+        <p class="muted" style="margin:2px 0 10px">按你的等级自动排好，点「一键跟学」直接开练并打卡，或跳转 B站看原视频。每天自动换一批。</p>
+        <div class="task-list">
+          ${videos.map((v) => {
+            const done = !!studiedMap[v.id];
+            return `<div class="fr-video ${done ? 'done' : ''}">
+              <div class="habit-main" style="flex:1;min-width:0">
+                <div class="habit-name">${esc(v.title)} ${done ? '<span class="tag-ok">✓ 已学</span>' : ''}</div>
+                <div class="habit-meta">${esc(v.desc)} · <span class="lv">${v.tag}</span></div>
+              </div>
+              <div class="fr-video-actions">
+                <button class="btn ${done ? 'ghost sm' : 'sm'}" data-action="fr-video-study" data-id="${esc(v.id)}">${done ? '↻ 再看' : '▶ 一键跟学'}</button>
+                ${jumpBtn(French.biliSearchUrl(v.kw), '🔗 跳转B站原视频').replace('jump-btn', 'jump-btn sm')}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
       </div>
 
       <div class="grid grid-2">
@@ -2681,6 +2754,13 @@ input, textarea, select { font-family: inherit; }
       case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o); break;
       case 'fr-toggle': { const on = S.toggleFrench(ui.frenchDate); toast(on ? '已标记今日有学 ✓' : '已取消'); refreshTop(); renderFrench(); break; }
       case 'fr-add-video': frAddVideoModal(t.dataset.topic); break;
+      // 法语每日跟学：一键开练（跳转 B站并打卡）
+      case 'fr-video-study': {
+        const v = French.dailyVideos(ui.frenchDate, S.DB.french.level).find((x) => x.id === t.dataset.id);
+        if (v) { try { window.open(French.biliSearchUrl(v.kw), '_blank'); } catch (e) {} }
+        S.setFrenchVideo(ui.frenchDate, t.dataset.id, true);
+        toast('已开始跟学 ✓'); renderFrench(); break;
+      }
       // 日历
       case 'cal-prev': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() - 1, 1); renderCalendar(); break;
       case 'cal-next': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() + 1, 1); renderCalendar(); break;
