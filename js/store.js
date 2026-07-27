@@ -1,0 +1,261 @@
+/* ============================================================
+   store.js · 本地数据层（localStorage）
+   所有数据持久化在浏览器，无需服务器，离线可用。
+   ============================================================ */
+(function (global) {
+  'use strict';
+
+  const STORE_KEY = 'yueji_workbench_v1';
+  const uid = () => Math.random().toString(36).slice(2, 9);
+
+  function todayStr(d) {
+    d = d || new Date();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${m}-${day}`;
+  }
+  function addDays(dateStr, n) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + n);
+    return todayStr(d);
+  }
+
+  function defaultData() {
+    return {
+      user: { name: '小主' },
+      habits: [
+        { id: uid(), name: '拍八虚', icon: '🤲', videoUrl: '', note: '疏通经络，每天早晚各一次', done: {} },
+        { id: uid(), name: '八段锦', icon: '🧘', videoUrl: '', note: '传统养生功法，全套约 12 分钟', done: {} },
+        { id: uid(), name: '仙人揉腹', icon: '🌿', videoUrl: '', note: '顺时针揉腹，助消化安眠', done: {} },
+      ],
+      postureCats: [
+        { id: uid(), name: '肩' },
+        { id: uid(), name: '背' },
+        { id: uid(), name: '臀' },
+        { id: uid(), name: '腿' },
+        { id: uid(), name: '全身' },
+      ],
+      postureExercises: [], // {id, catId, name, videoUrl, done:{}}
+      recipes: [],          // {id, title, videoUrl, tags:[], ingredients:[], steps:[], tips}
+      diary: [],            // {id, date, content, tags:[]}
+      plans: [],            // {id, date, title, time, done}
+      french: {
+        level: 'A1',
+        records: {},        // date -> {duration, tasks:{listen,speak,read}, test:{...}}
+      },
+      viral: { date: '', items: [] },
+      tea: { favorites: [], week: { start: '', plan: {} } }, // 茶饮管家：收藏id / 周计划
+      settings: { theme: 'purple', name: '小主' },
+    };
+  }
+
+  let DB = load();
+
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return defaultData();
+      const data = JSON.parse(raw);
+      // 简单兜底，确保字段存在
+      const def = defaultData();
+      return Object.assign(def, data, {
+        settings: Object.assign(def.settings, data.settings || {}),
+        french: Object.assign(def.french, data.french || {}),
+        tea: Object.assign(def.tea, data.tea || {}),
+      });
+    } catch (e) {
+      return defaultData();
+    }
+  }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) {}
+  }
+
+  /* ---------- 通用打卡 ---------- */
+  // coll: 'habits' | 'postureExercises' ；集合项含 done:{date:true}
+  function toggleDone(coll, id, date) {
+    date = date || todayStr();
+    const item = DB[coll].find((x) => x.id === id);
+    if (!item) return false;
+    item.done = item.done || {};
+    if (item.done[date]) delete item.done[date];
+    else item.done[date] = true;
+    save();
+    return !!item.done[date];
+  }
+  function isDone(coll, id, date) {
+    const item = DB[coll].find((x) => x.id === id);
+    return !!(item && item.done && item.done[date]);
+  }
+
+  /* ---------- 养生习惯 ---------- */
+  function addHabit(obj) {
+    DB.habits.push(Object.assign({ id: uid(), icon: '🌿', videoUrl: '', note: '', done: {} }, obj));
+    save();
+  }
+  function updateHabit(id, patch) {
+    const h = DB.habits.find((x) => x.id === id);
+    if (h) Object.assign(h, patch);
+    save();
+  }
+  function removeHabit(id) {
+    DB.habits = DB.habits.filter((x) => x.id !== id);
+    save();
+  }
+
+  /* ---------- 体态锻炼 ---------- */
+  function addPostureCat(name) {
+    DB.postureCats.push({ id: uid(), name });
+    save();
+  }
+  function removePostureCat(id) {
+    DB.postureExercises = DB.postureExercises.filter((e) => e.catId !== id);
+    DB.postureCats = DB.postureCats.filter((c) => c.id !== id);
+    save();
+  }
+  function addPostureExercise(catId, obj) {
+    DB.postureExercises.push(Object.assign({ id: uid(), catId, videoUrl: '', done: {} }, obj));
+    save();
+  }
+  function updatePostureExercise(id, patch) {
+    const e = DB.postureExercises.find((x) => x.id === id);
+    if (e) Object.assign(e, patch);
+    save();
+  }
+  function removePostureExercise(id) {
+    DB.postureExercises = DB.postureExercises.filter((x) => x.id !== id);
+    save();
+  }
+  function postureByCat(catId) {
+    return DB.postureExercises.filter((e) => e.catId === catId);
+  }
+
+  /* ---------- 食谱 ---------- */
+  function addRecipe(obj) {
+    DB.recipes.push(Object.assign({ id: uid(), title: '未命名方子', videoUrl: '', tags: [], ingredients: [], steps: [], tips: '' }, obj));
+    save();
+    return DB.recipes[DB.recipes.length - 1];
+  }
+  function updateRecipe(id, patch) {
+    const r = DB.recipes.find((x) => x.id === id);
+    if (r) Object.assign(r, patch);
+    save();
+  }
+  function removeRecipe(id) {
+    DB.recipes = DB.recipes.filter((x) => x.id !== id);
+    save();
+  }
+
+  /* ---------- 日记 ---------- */
+  function upsertDiary(date, content) {
+    let d = DB.diary.find((x) => x.date === date);
+    if (d) d.content = content;
+    else DB.diary.push({ id: uid(), date, content });
+    save();
+    return d || DB.diary[DB.diary.length - 1];
+  }
+  function getDiary(date) {
+    return DB.diary.find((x) => x.date === date);
+  }
+  function removeDiary(id) {
+    DB.diary = DB.diary.filter((x) => x.id !== id);
+    save();
+  }
+
+  /* ---------- 计划（日历） ---------- */
+  function addPlan(obj) {
+    DB.plans.push(Object.assign({ id: uid(), date: todayStr(), title: '', time: '', done: false }, obj));
+    save();
+  }
+  function updatePlan(id, patch) {
+    const p = DB.plans.find((x) => x.id === id);
+    if (p) Object.assign(p, patch);
+    save();
+  }
+  function removePlan(id) {
+    DB.plans = DB.plans.filter((x) => x.id !== id);
+    save();
+  }
+  function plansOn(date) {
+    return DB.plans.filter((p) => p.date === date);
+  }
+
+  /* ---------- 法语 ---------- */
+  function setFrenchLevel(level) { DB.french.level = level; save(); }
+  function recordFrench(date, rec) {
+    DB.french.records[date] = Object.assign(DB.french.records[date] || {}, rec);
+    save();
+  }
+  function getFrench(date) { return DB.french.records[date]; }
+  function frenchDone(date) { return !!(DB.french.records[date] && DB.french.records[date].done); }
+  function toggleFrench(date) {
+    const r = DB.french.records[date] || { done: false };
+    r.done = !r.done;
+    DB.french.records[date] = r;
+    save();
+    return r.done;
+  }
+
+  /* ---------- 主题 ---------- */
+  function setTheme(t) { DB.settings.theme = t; save(); applyTheme(); }
+  function applyTheme() {
+    document.documentElement.setAttribute('data-theme', DB.settings.theme || 'purple');
+  }
+
+  /* ---------- 茶饮管家 ---------- */
+  function isTeaFav(id) { return DB.tea.favorites.includes(id); }
+  function toggleTeaFav(id) {
+    const i = DB.tea.favorites.indexOf(id);
+    if (i >= 0) DB.tea.favorites.splice(i, 1); else DB.tea.favorites.push(id);
+    save();
+    return isTeaFav(id);
+  }
+  function setTeaDay(date, teaId) {
+    DB.tea.week.plan = DB.tea.week.plan || {};
+    DB.tea.week.plan[date] = teaId;
+    save();
+  }
+  function clearTeaDay(date) {
+    if (DB.tea.week.plan) delete DB.tea.week.plan[date];
+    save();
+  }
+  function getTeaPlan() { return DB.tea.week.plan || {}; }
+
+  /* ---------- 今日聚合（概览/侧栏） ---------- */
+  function todaySummary() {
+    const t = todayStr();
+    const healthDone = DB.habits.filter((h) => h.done && h.done[t]).length;
+    const postureDone = DB.postureExercises.filter((e) => e.done && e.done[t]).length;
+    const postureTotal = DB.postureExercises.length;
+    const french = frenchDone(t);
+    const total = healthDone + postureDone + (french ? 1 : 0);
+    return { healthDone, healthTotal: DB.habits.length, postureDone, postureTotal, french, total };
+  }
+
+  /* ---------- 导出/导入（备份） ---------- */
+  function exportData() { return JSON.stringify(DB, null, 2); }
+  function importData(json) {
+    try {
+      const data = JSON.parse(json);
+      DB = Object.assign(defaultData(), data);
+      save();
+      return true;
+    } catch (e) { return false; }
+  }
+
+  global.Store = {
+    get DB() { return DB; },
+    save, uid, todayStr, addDays,
+    toggleDone, isDone,
+    addHabit, updateHabit, removeHabit,
+    addPostureCat, removePostureCat, addPostureExercise, updatePostureExercise, removePostureExercise, postureByCat,
+    addRecipe, updateRecipe, removeRecipe,
+    upsertDiary, getDiary, removeDiary,
+    addPlan, updatePlan, removePlan, plansOn,
+    setFrenchLevel, recordFrench, getFrench, frenchDone, toggleFrench,
+    setTheme, applyTheme,
+    isTeaFav, toggleTeaFav, setTeaDay, clearTeaDay, getTeaPlan,
+    todaySummary, exportData, importData,
+  };
+})(window);
