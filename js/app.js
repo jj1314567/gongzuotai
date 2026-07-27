@@ -512,11 +512,11 @@
       const items = French.dailySkillItems(skill.key, ui.frenchDate, S.DB.french.level, total);
       const prog = S.frenchSkillProgress(ui.frenchDate, skill.key, total);
       const pct = prog.pct;
-      const videoKw = French.skillVideoKw(skill.key, ui.frenchDate);
-      const videoUrls = French.skillVideoUrls(skill.key, ui.frenchDate);
       const itemsHTML = items.map((it) => {
         const st = S.getFrenchSkillItem(ui.frenchDate, skill.key, it.id);
         const done = !!(st && st.done);
+        const v = French.getItemVideo(it.id);
+        const videoBtn = v ? `<a class="fr-video-btn" href="${esc(v.url)}" target="_blank" rel="noopener" title="${esc(v.title)}">▶ 看视频</a>` : '';
         if (skill.kind === 'write') {
           const text = (st && st.text) || '';
           return `<div class="fr-item ${done ? 'done' : ''}">
@@ -526,6 +526,7 @@
               <textarea class="fr-write" data-write data-skill="${skill.key}" data-id="${esc(it.id)}" placeholder="在这里用法语写一写，自动保存…">${esc(text)}</textarea>
               <details class="fr-ex"><summary>看示例</summary><div class="fr-ex-body">${esc(it.model)}</div></details>
             </div>
+            ${videoBtn ? `<div class="fr-item-foot">${videoBtn}</div>` : ''}
             <button class="check ${done ? 'on' : ''}" data-action="fr-skill-item" data-skill="${skill.key}" data-id="${esc(it.id)}" title="标记完成">${done ? '✓' : ''}</button>
           </div>`;
         }
@@ -537,6 +538,7 @@
             <div class="fr-item-zh">${esc(it.zh)}</div>
             ${it.tip ? `<div class="fr-item-tip">💡 ${esc(it.tip)}</div>` : ''}
           </div>
+          ${videoBtn ? `<div class="fr-item-foot">${videoBtn}</div>` : ''}
           <button class="check ${done ? 'on' : ''}" data-action="fr-skill-item" data-skill="${skill.key}" data-id="${esc(it.id)}" title="标记完成">${done ? '✓' : ''}</button>
         </div>`;
       }).join('');
@@ -548,12 +550,6 @@
         </div>
         <div class="fr-progress ${pct === 100 ? 'done' : ''}"><i style="width:${pct}%"></i></div>
         <div class="fr-items">${itemsHTML}</div>
-        <div class="fr-video-row">
-          <div class="fr-video-row-top"><span>📺 今日跟学视频</span><span class="fr-video-kw">${esc(videoKw)}</span></div>
-          <div class="fr-video-btns">
-            ${videoUrls.map((p) => jumpBtn(p.url, '▶ ' + p.name).replace('class="jump-btn"', 'class="jump-btn sm"')).join('')}
-          </div>
-        </div>
       </div>`;
     };
 

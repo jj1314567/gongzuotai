@@ -174,6 +174,92 @@
     });
   });
 
+  /* ---------------- 每个知识点对应的具体跟学视频 ----------------
+     说明：纯前端无法在运行时跨域实时抓 B站 接口（且服务端抓取被 B站风控拦截），
+     故在「构建/发布」阶段用 WebSearch 预搜好每个技能×等级对应的真实 B站 视频直链，
+     烘焙进本文件。每条素材点「▶ 看视频」即可直接打开对应视频，无需再自己搜索。
+     等级专属优先；若该等级视频不足，自动用同技能其它等级的视频补齐，保证每天条数都有对应视频。 */
+  const SKILL_VIDEOS = {
+    listen: {
+      A1: [
+        { bvid: 'BV1e43L6FEAX', title: '法语A1听力入门故事（慢速跟读）' },
+        { bvid: 'BV1FeZFBVEgs', title: '200篇中法字幕慢速法语对话 A1-B2' },
+        { bvid: 'BV1MUEvzGEKP', title: 'A1级慢速法语日常对话·纯正法腔' },
+        { bvid: 'BV1tBamzyEWK', title: 'A1实用版法语播客·每天磨耳朵' },
+      ],
+      A2: [
+        { bvid: 'BV1Acs3zUEoo', title: 'A2实用版法语播客·每天磨耳朵（超慢速）' },
+        { bvid: 'BV1Kg3g6iEQy', title: '法语A1A2听力练习·法国火车站广播' },
+      ],
+      B2: [
+        { bvid: 'BV185gY6ME6B', title: '每日法闻·慢速精听（B2 时事）' },
+      ],
+    },
+    speak: {
+      A1: [
+        { bvid: 'BV1G7411g7gC', title: '你好法语A1·语音入门第04集' },
+        { bvid: 'BV1VQ4y1J7ob', title: '你好法语A1全集·字母发音语法口语' },
+        { bvid: 'BV1p741137U4', title: '你好法语A1·语音入门第02集' },
+        { bvid: 'BV19C4y1H7XQ', title: '你好法语A1下·第11课' },
+        { bvid: 'BV11i4y1M7Gw', title: '你好法语A1·词汇跟读 Unité1-3' },
+      ],
+      A2: [
+        { bvid: 'BV1tu3g6TEVZ', title: '法语与故事对话入门·简单对话 A1A2' },
+        { bvid: 'BV144L16jE1x', title: '法语影子跟读课·每天3分钟50话题' },
+      ],
+      B2: [
+        { bvid: 'BV1dANw62EC7', title: '法语口语对话练习·谈论工作面试' },
+      ],
+    },
+    read: {
+      A1: [
+        { bvid: 'BV1W8411J7Rp', title: '法语入门A1合集·零基础精讲' },
+        { bvid: 'BV1sDnwzUEmY', title: '法语A1核心词汇·分类慢速跟读' },
+      ],
+    },
+    write: {
+      A1: [
+        { bvid: 'BV1Kx3E6tEWE', title: 'Édito A1-C1 法语教材·听说读写' },
+      ],
+    },
+  };
+  // 跨等级补齐用的全局池（每个技能把各等级视频去重合并）
+  const SKILL_VIDEO_POOL = {};
+  SKILLS.forEach((sk) => {
+    const pool = [];
+    const src = SKILL_VIDEOS[sk.key] || {};
+    Object.keys(src).forEach((lv) => src[lv].forEach((v) => {
+      if (!pool.some((x) => x.bvid === v.bvid)) pool.push(v);
+    }));
+    SKILL_VIDEO_POOL[sk.key] = pool;
+  });
+  // 由 SKILL_VIDEOS 派生 ITEM_VIDEOS：item id = skill-level-index
+  const ITEM_VIDEOS = (function () {
+    const out = {};
+    SKILLS.forEach((sk) => {
+      const src = SKILL_VIDEOS[sk.key] || {};
+      const pool = SKILL_VIDEO_POOL[sk.key] || [];
+      // 遍历该技能在 SKILL_CONTENT 中存在的所有等级（A1~B2），缺失的用全局池补齐
+      Object.keys(SKILL_CONTENT[sk.key]).forEach((lv) => {
+        let list = (src[lv] || []).slice();
+        // 该等级视频不足每日条数时，用同技能其它等级视频补齐
+        let i = 0;
+        while (list.length < sk.perDay && pool.length) {
+          const cand = pool[i % pool.length]; i++;
+          if (!list.some((x) => x.bvid === cand.bvid)) list.push(cand);
+          if (i > pool.length * 3) break;
+        }
+        (SKILL_CONTENT[sk.key][lv] || []).forEach((it, idx) => {
+          const v = list[idx % list.length];
+          out[it.id] = v ? { url: 'https://www.bilibili.com/video/' + v.bvid + '/', title: v.title, bvid: v.bvid } : null;
+        });
+      });
+    });
+    return out;
+  })();
+
+  function getItemVideo(id) { return ITEM_VIDEOS[id] || null; }
+
   function skillPool(skill, level) {
     const bank = SKILL_CONTENT[skill] || {};
     return bank[level] || bank.B2 || [];
@@ -324,5 +410,5 @@
     return shuffle(pool).slice(0, Math.min(n, pool.length));
   }
 
-  global.French = { LEVELS, getLevel, lessonTopics, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos, SKILLS, dailySkillItems, skillTotals, PLATFORMS, SKILL_VIDEO_KW, skillVideoKw, skillVideoUrls };
+  global.French = { LEVELS, getLevel, lessonTopics, genQuiz, shuffle, VIDEO_TOPICS, biliSearchUrl, dailyVideos, SKILLS, dailySkillItems, skillTotals, PLATFORMS, SKILL_VIDEO_KW, skillVideoKw, skillVideoUrls, ITEM_VIDEOS, getItemVideo };
 })(window);
