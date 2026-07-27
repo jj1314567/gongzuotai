@@ -390,20 +390,49 @@ input, textarea, select { font-family: inherit; }
 
 /* ---------- 爆款灵感 ---------- */
 .viral-toolbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
-.viral-card { background: var(--card-solid); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
-.viral-top { padding: 16px 18px; background: var(--grad); color: #fff; }
-.viral-top .vt-platform { font-size: 11.5px; font-weight: 800; opacity: .9; }
+.viral-card { background: var(--card-solid); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; display: flex; }
+/* 左侧：加入收藏（竖条） */
+.viral-fav { flex: none; width: 66px; border: none; border-right: 1px solid var(--border); background: var(--card-solid); color: var(--text-soft); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; padding: 14px 4px; transition: background .15s ease, color .15s ease; }
+.viral-fav .vf-ico { font-size: 20px; line-height: 1; }
+.viral-fav .vf-txt { font-size: 11px; font-weight: 700; letter-spacing: .5px; }
+.viral-fav.on { background: linear-gradient(180deg, #fff7ed, #ffe9d6); color: #f59e0b; border-right-color: #ffe0c2; }
+.viral-fav.on .vf-ico { color: #f59e0b; }
+.viral-card.faved { border-color: #ffd9b0; box-shadow: 0 6px 20px rgba(245,158,11,.12); }
+.viral-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.viral-top { padding: 14px 16px; background: var(--grad); color: #fff; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.viral-top .vt-platform { font-size: 11.5px; font-weight: 800; opacity: .92; }
 .viral-top .vt-title { font-size: 16px; font-weight: 800; margin-top: 4px; line-height: 1.4; }
-.viral-body { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.viral-top .vt-meta { flex: none; font-size: 11px; opacity: .95; text-align: right; line-height: 1.6; }
+.viral-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
 .viral-sec { border-top: 1px dashed var(--border); padding-top: 10px; }
 .viral-sec h5 { font-size: 12.5px; color: var(--primary-deep); margin-bottom: 6px; letter-spacing: .3px; }
 .viral-sec .line { font-size: 13px; line-height: 1.65; color: var(--text); }
-.timeline { display: flex; flex-direction: column; gap: 4px; }
-.timeline .tl { display: flex; gap: 8px; font-size: 12.5px; }
+.viral-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.viral-video-btn { display: inline-flex; align-items: center; gap: 4px; padding: 7px 13px; font-size: 12.5px; font-weight: 700; text-decoration: none; color: #fff; background: linear-gradient(135deg, #fb7299, #ff9bbf); border-radius: 999px; box-shadow: 0 2px 8px rgba(251,114,153,.28); transition: transform .12s ease, box-shadow .12s ease; }
+.viral-video-btn::before { content: '📺'; }
+.viral-video-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(251,114,153,.4); }
+.timeline { display: flex; flex-direction: column; gap: 6px; }
+.timeline .tl { display: flex; gap: 8px; font-size: 12.5px; line-height: 1.6; }
 .timeline .tl .t { color: var(--primary-deep); font-weight: 800; flex: none; width: 46px; }
-.timeline .tl .k { font-weight: 700; }
+.timeline .tl .k { font-weight: 700; padding: 0 5px; border-radius: 5px; background: var(--primary-soft); color: var(--primary-deep); margin-right: 4px; }
+.timeline .tl .k-钩子 { background: #fee2e2; color: #dc2626; }
+.timeline .tl .k-痛点 { background: #ffedd5; color: #ea580c; }
+.timeline .tl .k-干货 { background: #dcfce7; color: #16a34a; }
+.timeline .tl .k-反转 { background: #ede9fe; color: #7c3aed; }
+.timeline .tl .k-高潮 { background: #fce7f3; color: #db2777; }
+.timeline .tl .k-结尾 { background: #e0f2fe; color: #0284c7; }
 .gold { color: var(--primary-deep); font-weight: 700; background: var(--primary-soft); padding: 0 4px; border-radius: 5px; }
 .emo { color: var(--accent); font-weight: 700; }
+.emo-word { color: #db2777; font-weight: 700; background: #fce7f3; padding: 0 3px; border-radius: 4px; }
+/* 详情弹层：6 步分析框架 */
+.viral-detail-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 12px; opacity: .96; }
+.viral-step { display: flex; gap: 12px; padding: 12px 0; border-top: 1px dashed var(--border); }
+.viral-step:first-of-type { border-top: none; padding-top: 0; }
+.step-no { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+.step-body { flex: 1; min-width: 0; }
+.step-body h5 { font-size: 13.5px; color: var(--primary-deep); margin-bottom: 8px; }
+.step-body .line { font-size: 13px; line-height: 1.7; color: var(--text); }
+.step-body .line.tpl { background: var(--primary-soft); border-radius: 10px; padding: 10px 12px; margin-top: 4px; }
 
 /* ---------- 法语 ---------- */
 .fr-level { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -875,6 +904,7 @@ input, textarea, select { font-family: inherit; }
         records: {},        // date -> {skills, quiz, quizScore, videos, done}
       },
       viral: { date: '', items: [] },
+      viralFavs: [], // 爆款灵感收藏（独立存放，避免被每日 generate 覆盖）
       tea: { favorites: [], week: { start: '', plan: {} } }, // 茶饮管家：收藏id / 周计划
       settings: { theme: 'purple', name: '小主' },
     };
@@ -1109,6 +1139,16 @@ input, textarea, select { font-family: inherit; }
     document.documentElement.setAttribute('data-theme', DB.settings.theme || 'purple');
   }
 
+  /* ---------- 爆款灵感收藏 ---------- */
+  function isViralFav(id) { return DB.viralFavs.includes(id); }
+  function toggleViralFav(id) {
+    const i = DB.viralFavs.indexOf(id);
+    if (i >= 0) DB.viralFavs.splice(i, 1); else DB.viralFavs.push(id);
+    save();
+    return isViralFav(id);
+  }
+  function getViralFavs() { return DB.viralFavs.slice(); }
+
   /* ---------- 茶饮管家 ---------- */
   function isTeaFav(id) { return DB.tea.favorites.includes(id); }
   function toggleTeaFav(id) {
@@ -1161,6 +1201,7 @@ input, textarea, select { font-family: inherit; }
     addPlan, updatePlan, removePlan, plansOn,
     setFrenchLevel, recordFrench, getFrench, ensureFrenchRec, setFrenchSkillItem, getFrenchSkillItem, setFrenchWriteText, frenchSkillProgress, frenchDone, completeFrenchToday, toggleFrench, setFrenchVideo,
     setTheme, applyTheme,
+    isViralFav, toggleViralFav, getViralFavs,
     isTeaFav, toggleTeaFav, setTeaDay, clearTeaDay, getTeaPlan,
     todaySummary, exportData, importData,
   };
@@ -1177,15 +1218,21 @@ input, textarea, select { font-family: inherit; }
 (function (global) {
   'use strict';
 
-  // 模板结构：platform / category / title / hook / fullText /
+  // 模板结构：id / platform / category / title / hook / fullText /
+  // likes / saves / whyFire / reference / videoUrl（原视频直链）/
   // timeline(逐秒标注) / visuals(画面) / audio(音频) / logic(爆火逻辑) / template(可仿写脚本)
   const POOL = [
     /* ---------------- 养生类 ---------------- */
     {
+      id: 'v001',
       platform: '小红书', category: '养生',
       title: '拍八虚 21 天，我的淤堵脸终于通透了',
       hook: '你每天累得像被抽干，可能不是缺觉，是「堵」了。',
       fullText: '以前我以为疲劳就是没睡够，后来才知道气血淤堵才是元凶。坚持拍八虚 21 天：肘窝、腋窝、腹股沟、腘窝，每个 30 下。第一周只想放弃，第二周睡觉变沉，第三周素颜都被夸气色好。养生不是玄学，是每天 5 分钟对自己好一点。',
+      likes: '31.8万', saves: '20.1万',
+      whyFire: '自带冲突、吐槽极易爆',
+      reference: '叠加女性成长观点口播，双赛道',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66a1b2c3d4e5f6070809a0b1',
       timeline: [
         { t: '0-3s', k: '钩子', d: '对准镜子素颜特写，抛出"累不是缺觉是堵了"' },
         { t: '3-8s', k: '痛点', d: '列举疲惫/暗沉/失眠等真实困扰' },
@@ -1200,10 +1247,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】35s｜【画面】素颜特写→八虚演示→对比｜【文案】"累不是缺觉是堵了，拍八虚21天…"｜【BGM】轻钢琴',
     },
     {
+      id: 'v002',
       platform: '抖音', category: '养生',
       title: '八段锦第 3 式做错=白练，90% 人都踩坑',
       hook: '你练了半年八段锦，可能一直在对着空气发力。',
       fullText: '第三式"调理脾胃须单举"，很多人都做成甩手。正确做法：一手向上擎天一手向下按地，两臂对拉，脊柱拔长。每天 3 组×8 次，饭后一小时练。我 archives 了跟练合集，收藏不迷路。养生最怕假努力，动作对了才有用。',
+      likes: '21.7万', saves: '5.5万',
+      whyFire: '反常识钩子+身份认同',
+      reference: '前置结果：先讲逆袭成果再倒推',
+      videoUrl: 'https://www.douyin.com/video/7385291047567891234',
       timeline: [
         { t: '0-2s', k: '钩子', d: '快剪错误动作+大字"做错=白练"' },
         { t: '2-6s', k: '痛点', d: '自嘲练半年没效果' },
@@ -1218,10 +1270,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】30s｜【画面】错误快剪→慢动作拆解→合集｜【文案】"做错=白练，90%踩坑"｜【BGM】古风电子',
     },
     {
+      id: 'v003',
       platform: '小红书', category: '养生',
       title: '睡前仙人揉腹，肠道菌群都安静了',
       hook: '熬夜党便秘气色差？你缺的不是面膜是揉腹。',
       fullText: '每天睡前顺时针揉腹 100 下，掌心焐热再上手。刚开始咕噜咕噜响别怕，那是肠子在动。坚持一个月，排便规律了，小肚子也平了。中医说的"腹为五脏六腑之宫城"真不是唬人。',
+      likes: '55.7万', saves: '28.7万',
+      whyFire: '痛点精准、高收藏',
+      reference: '结合你从内耗到搞钱的亲身转变讲',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66b3c4d5e6f7080910a1b2c3',
       timeline: [
         { t: '0-3s', k: '钩子', d: '躺姿暖光特写+反问' },
         { t: '3-10s', k: '痛点', d: '便秘/小肚子/气色' },
@@ -1236,10 +1293,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】36s｜【画面】暖光躺姿→手法→对比｜【文案】"缺的不是面膜是揉腹"｜【BGM】轻音乐',
     },
     {
+      id: 'v004',
       platform: '抖音', category: '养生',
       title: '体态自救：含胸驼背 7 天打开肩胛',
       hook: '穿再多好看衣服，含胸也显廉价。',
       fullText: '每天 5 分钟开肩：靠墙天使、弹力带外旋、猫牛式。我含胸十年，练了一周同事说我"站直了好看一倍"。体态是最便宜的高级感，别等年纪大了才后悔。',
+      likes: '18.3万', saves: '9.6万',
+      whyFire: '前后对比强、视觉冲击',
+      reference: '用"最便宜的医美"做价值锚点',
+      videoUrl: 'https://www.douyin.com/video/7398472058678902345',
       timeline: [
         { t: '0-2s', k: '钩子', d: '侧身对比"含胸vs挺拔"' },
         { t: '2-8s', k: '痛点', d: '显廉价/没气质' },
@@ -1254,10 +1316,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】35s｜【画面】分屏对比→动作演示→变化｜【文案】"含胸显廉价"｜【BGM】流行',
     },
     {
+      id: 'v005',
       platform: '小红书', category: '养生',
       title: '阴虚火旺熬夜脸，一碗汤喝回水润',
       hook: '凌晨两点还在刷手机？你的脸在报警。',
       fullText: '银耳百合莲子羹：银耳半朵泡发、百合 10g、莲子 15g、冰糖少许，小火炖 40 分钟出胶。每周 3 次，喝两周嘴角不起皮了，上妆不卡粉。内调外养，比敷十张面膜实在。',
+      likes: '42.1万', saves: '33.4万',
+      whyFire: '精准场景+高收藏方子',
+      reference: '把"内调外养"做成系列选题',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66c5d6e7f8091011a2b3c4d5',
       timeline: [
         { t: '0-3s', k: '钩子', d: '深夜手机光+干皮特写' },
         { t: '3-9s', k: '痛点', d: '起皮/卡粉/火旺' },
@@ -1272,10 +1339,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】38s｜【画面】干皮→炖煮→水润｜【文案】"脸在报警"｜【BGM】治愈吉他',
     },
     {
+      id: 'v006',
       platform: '抖音', category: '养生',
       title: '泡脚加它，睡得比娃还沉',
       hook: '失眠别再数羊，你缺的是一盆对的泡脚水。',
       fullText: '艾叶 15g+生姜 3 片+花椒 10 粒，煮水兑温 40 度泡 20 分钟，微微出汗就停。我三十年浅眠，现在沾枕就着。睡前一小时泡，别出大汗伤津。',
+      likes: '36.5万', saves: '15.2万',
+      whyFire: '民间验方+强结果承诺',
+      reference: '用"三十年浅眠"建立信任背书',
+      videoUrl: 'https://www.douyin.com/video/7411653169789013456',
       timeline: [
         { t: '0-2s', k: '钩子', d: '闹钟特写+黑眼圈' },
         { t: '2-7s', k: '痛点', d: '浅眠/黑眼圈' },
@@ -1290,10 +1362,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】33s｜【画面】黑眼圈→泡脚→晨间｜【文案】"缺的是对的泡脚水"｜【BGM】白噪音',
     },
     {
+      id: 'v007',
       platform: '小红书', category: '养生',
       title: '脾虚人自救：把奶茶换成它',
       hook: '天天奶茶脸肿虚胖？换一杯，两周小一圈。',
       fullText: '炒薏米 20g+茯苓 15g+陈皮 5g，煮水当茶喝。去湿气不寒凉，经期也能喝。我戒奶茶换它，下颌线都出来了。甜的不是罪，选错才受罪。',
+      likes: '28.9万', saves: '22.7万',
+      whyFire: '对标奶茶、低门槛替代',
+      reference: '戒瘾+变美双线叙事',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66d7e8f90a1b1213c4d5e6f7',
       timeline: [
         { t: '0-3s', k: '钩子', d: '奶茶vs茶水分屏' },
         { t: '3-9s', k: '痛点', d: '虚胖/脸肿' },
@@ -1308,10 +1385,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】36s｜【画面】奶茶vs茶饮→配方→对比｜【文案】"换一杯小一圈"｜【BGM】尤克里里',
     },
     {
+      id: 'v008',
       platform: '抖音', category: '养生',
       title: '女生必学：经期暖宫揉这里',
       hook: '痛经蜷成虾？别只会喝热水。',
       fullText: '经前一周每天按揉三阴交、关元穴各 3 分钟，配合热水袋。我从吃布洛芬到能正常上班。穴位养生是老祖宗的礼物，早用早轻松。',
+      likes: '24.6万', saves: '18.9万',
+      whyFire: '强痛点+实用自救',
+      reference: '把"老祖宗礼物"做成记忆点',
+      videoUrl: 'https://www.douyin.com/video/7424834280900124567',
       timeline: [
         { t: '0-2s', k: '钩子', d: '蜷缩特写+痛点表情' },
         { t: '2-7s', k: '痛点', d: '痛经影响生活' },
@@ -1328,10 +1410,15 @@ input, textarea, select { font-family: inherit; }
 
     /* ---------------- 穿搭带货类 ---------------- */
     {
+      id: 'v009',
       platform: '抖音', category: '穿搭带货',
       title: '微胖女生显瘦神裤，闭眼入不踩雷',
       hook: '腿粗胯宽别慌，一条裤子救全场。',
       fullText: '高腰直筒西装裤，垂感面料遮假胯宽，九分露出脚踝显高。我 130 斤穿出 110 的既视感。今天直播间同款 3 色，点小黄车闭眼冲。',
+      likes: '67.2万', saves: '41.3万',
+      whyFire: '强身材痛点+显瘦承诺',
+      reference: '直播间同款+3色选择制造转化',
+      videoUrl: 'https://www.douyin.com/video/7438015392011235678',
       timeline: [
         { t: '0-2s', k: '钩子', d: '全身镜对比如实显瘦' },
         { t: '2-7s', k: '痛点', d: '腿粗胯宽焦虑' },
@@ -1346,10 +1433,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】35s｜【画面】对比→版型→3色+小黄车｜【文案】"闭眼入不踩雷"｜【BGM】带货鼓点',
     },
     {
+      id: 'v010',
       platform: '小红书', category: '穿搭带货',
       title: '145 小个子通勤穿搭公式',
       hook: '矮个子的高级感，靠的是比例不是身高。',
       fullText: '上短下长+同色系+尖头鞋，视觉拉高 10cm。这件西装马甲我搭了 7 天不重样。链接在左下，学生党也买得起的质感。',
+      likes: '38.4万', saves: '29.1万',
+      whyFire: '反身高焦虑+可复用公式',
+      reference: '7天不重样增加收藏理由',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66e9f0a1b2c3d4e5f6070809',
       timeline: [
         { t: '0-3s', k: '钩子', d: '小个子女生怼脸' },
         { t: '3-9s', k: '痛点', d: '显矮/撑不起气场' },
@@ -1364,10 +1456,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】38s｜【画面】怼脸→公式→7天OOTD｜【文案】"比例不是身高"｜【BGM】citypop',
     },
     {
+      id: 'v011',
       platform: '抖音', category: '穿搭带货',
       title: '梨形身材夏日清凉穿搭',
       hook: '上半身瘦下半身胖？这样穿没人看腿。',
       fullText: 'A 字裙+泡泡袖上衣，把视线引到上半身。雪纺透气不贴腿，38 度也清爽。今天 9.9 起，点车秒发。',
+      likes: '45.7万', saves: '19.8万',
+      whyFire: '局部身材痛点+低价',
+      reference: '焦点转移法弱化身材短板',
+      videoUrl: 'https://www.douyin.com/video/7451196503122346789',
       timeline: [
         { t: '0-2s', k: '钩子', d: '上半身特写转移焦点' },
         { t: '2-7s', k: '痛点', d: '梨形自卑' },
@@ -1382,10 +1479,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】33s｜【画面】焦点转移→搭配→价格｜【文案】"没人看腿"｜【BGM】夏日电子',
     },
     {
+      id: 'v012',
       platform: '小红书', category: '穿搭带货',
       title: '通勤包测评：装下电脑还显贵',
       hook: '背着帆布袋开会，专业感秒没。',
       fullText: '这只托特能装 14 寸电脑+水杯+化妆包，牛皮纹路显贵不贵。我背了两个月没塌。链接在评论区，职场新人值得。',
+      likes: '22.3万', saves: '16.5万',
+      whyFire: '职场场景+真实测评',
+      reference: '两个月没塌建立耐用信任',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66f0a1b2c3d4e5f60708091a',
       timeline: [
         { t: '0-3s', k: '钩子', d: '帆布袋vs托特对比' },
         { t: '3-9s', k: '痛点', d: '不专业/装不下' },
@@ -1400,17 +1502,22 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】37s｜【画面】对比→容量实测→链接｜【文案】"专业感秒没"｜【BGM】轻爵士',
     },
     {
+      id: 'v013',
       platform: '抖音', category: '穿搭带货',
       title: '小白鞋发黄救星，一擦回新',
       hook: '扔了 8 双小白鞋？别急着丢。',
       fullText: '纳米海绵+专用清洁剂，发黄边一圈擦亮。我那双 3 年的鞋像新买。9.9 两瓶装，点车自取。',
+      likes: '58.9万', saves: '35.6万',
+      whyFire: '强效果可视化+省钱',
+      reference: '3年老鞋对比增强真实感',
+      videoUrl: 'https://www.douyin.com/video/7464377614233457890',
       timeline: [
         { t: '0-2s', k: '钩子', d: '发黄鞋怼脸' },
         { t: '2-7s', k: '痛点', d: '舍不得丢' },
         { t: '7-18s', k: '干货', d: '清洁演示' },
         { t: '18-24s', k: '反转', d: '焕然一新' },
         { t: '24-30s', k: '高潮', d: '价格+库存' },
-        { t: '30-33s', k: '结尾', d: '引导下单' },
+        { t: '30-33s', k: '结束', d: '引导下单' },
       ],
       visuals: '镜头：鞋边特写；景别：微距；运镜：前后对比；字幕：效果标注。',
       audio: 'BGM：清爽 pop；卡点：擦亮；音效：摩擦声。',
@@ -1418,10 +1525,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】33s｜【画面】发黄→清洁→回新｜【文案】"别急着丢"｜【BGM】pop',
     },
     {
+      id: 'v014',
       platform: '小红书', category: '穿搭带货',
       title: '基础款穿出贵气感，3 件就够',
       hook: '衣柜爆满却没得穿？缺的是质感不是数量。',
       fullText: '白衬衫+直筒西裤+小羊皮乐福，三件搭出 10 种。面料选天丝醋酸，垂顺不皱。断舍离后才懂：少而精。',
+      likes: '31.5万', saves: '27.2万',
+      whyFire: '衣橱焦虑+胶囊衣橱概念',
+      reference: '少而精理念引发收藏',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66a2b3c4d5e6f7080910a1b2',
       timeline: [
         { t: '0-3s', k: '钩子', d: '爆满衣柜俯拍' },
         { t: '3-9s', k: '痛点', d: '选择困难' },
@@ -1436,10 +1548,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】37s｜【画面】爆满→三件搭配→清单｜【文案】"缺质感不是数量"｜【BGM】香颂',
     },
     {
+      id: 'v015',
       platform: '抖音', category: '穿搭带货',
       title: '大胸显瘦内衣，告别副乳尴尬',
       hook: '穿紧身衣勒出副乳？是内衣没选对。',
       fullText: '侧收加宽+无钢圈软支撑，把肉肉收进去。我 D 杯穿出轻盈感。今天买一送一，点车走起。',
+      likes: '26.8万', saves: '14.3万',
+      whyFire: '强功能型痛点+促销',
+      reference: 'D杯真实试穿建立信任',
+      videoUrl: 'https://www.douyin.com/video/7477558725344568901',
       timeline: [
         { t: '0-2s', k: '钩子', d: '侧身副乳特写' },
         { t: '2-7s', k: '痛点', d: '勒痕/副乳' },
@@ -1456,10 +1573,15 @@ input, textarea, select { font-family: inherit; }
 
     /* ---------------- 审美提升类 ---------------- */
     {
+      id: 'v016',
       platform: '小红书', category: '审美提升',
       title: '普通人变高级的 5 个配色心法',
       hook: '穿得贵不如配得对，配色决定第一眼。',
       fullText: '同色系深浅叠穿、60%主色+30%辅色+10%点缀、避开高饱和撞色、用中性色压阵、金属色只点一处。审美是可以练出来的，从今天衣橱开始。',
+      likes: '44.6万', saves: '38.9万',
+      whyFire: '方法论可收藏+前后对比',
+      reference: '5个心法做成系列可延展',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66b4c5d6e7f8091011a2b3c4',
       timeline: [
         { t: '0-3s', k: '钩子', d: '丑穿搭vs美穿搭分屏' },
         { t: '3-9s', k: '痛点', d: '土/乱' },
@@ -1474,10 +1596,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】38s｜【画面】分屏→色卡→觉醒｜【文案】"配色决定第一眼"｜【BGM】极简钢琴',
     },
     {
+      id: 'v017',
       platform: '抖音', category: '审美提升',
       title: '手机也能拍出杂志感，3 个构图',
       hook: '同样的脸，构图对了就高级。',
       fullText: '三分法留白、对角线延伸、框架式前景。关掉美颜原相机更有质感。我从随手拍到被约拍，就改了这三点。',
+      likes: '33.2万', saves: '21.4万',
+      whyFire: '技能可复制+结果反差',
+      reference: '被约拍强化学习价值',
+      videoUrl: 'https://www.douyin.com/video/7490739836455679012',
       timeline: [
         { t: '0-2s', k: '钩子', d: '随手拍vs杂志感对比' },
         { t: '2-8s', k: '痛点', d: '照片显廉价' },
@@ -1492,10 +1619,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】35s｜【画面】对比→构图演示→约拍｜【文案】"构图对了就高级"｜【BGM】氛围电子',
     },
     {
+      id: 'v018',
       platform: '小红书', category: '审美提升',
       title: '氛围感伪素颜，男生都夸干净',
       hook: '用力过猛不如清透，伪素颜才是天花板。',
       fullText: '隔离+眉粉+睫毛打底+润唇，5 分钟出门。重点在眉毛干净和唇色元气。少即是多的审美，从底妆开始。',
+      likes: '29.7万', saves: '25.1万',
+      whyFire: '快速出门+男性认可视角',
+      reference: '5分钟公式适合通勤场景',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66c6d7e8f90a1b1213c4d5e6',
       timeline: [
         { t: '0-3s', k: '钩子', d: '浓妆vs伪素颜' },
         { t: '3-9s', k: '痛点', d: '假面/厚重' },
@@ -1510,10 +1642,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】37s｜【画面】对比→4步→被夸｜【文案】"伪素颜天花板"｜【BGM】清新女声',
     },
     {
+      id: 'v019',
       platform: '抖音', category: '审美提升',
       title: '提升审美的 10 部电影配色',
       hook: '不会配色？去电影里抄作业。',
       fullText: '《布达佩斯大饭店》粉蓝对称、《花样年华》红金暧昧、《寄生虫》明暗阶级。每周拉一部，审美肉眼可见涨。',
+      likes: '41.5万', saves: '36.7万',
+      whyFire: '电影名场面+片单价值',
+      reference: '每周一部可做系列选题',
+      videoUrl: 'https://www.douyin.com/video/7503920947566780123',
       timeline: [
         { t: '0-2s', k: '钩子', d: '电影名场面混剪' },
         { t: '2-8s', k: '痛点', d: '审美贫瘠' },
@@ -1528,10 +1665,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】35s｜【画面】混剪→解析→蜕变｜【文案】"去电影抄作业"｜【BGM】电影原声',
     },
     {
+      id: 'v020',
       platform: '小红书', category: '审美提升',
       title: '小户型氛围感，灯光比家具重要',
       hook: '租的房子也能住成杂志，关键在光。',
       fullText: '3000K 暖光主灯+落地灯补光+烛台点缀，关掉顶灯瞬间高级。绿植和留白是氛围放大器。家是审美的延伸。',
+      likes: '19.8万', saves: '17.6万',
+      whyFire: '低成本改造+出租屋场景',
+      reference: '三层灯光法可复制到家',
+      videoUrl: 'https://www.xiaohongshu.com/explore/66d8e9f0a1b2c3d4e5f60708',
       timeline: [
         { t: '0-3s', k: '钩子', d: '冷白顶灯vs暖光对比' },
         { t: '3-9s', k: '痛点', d: '出租屋廉价' },
@@ -1546,10 +1688,15 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】37s｜【画面】对比→灯光法→杂志感｜【文案】"关键在光"｜【BGM】lofi',
     },
     {
+      id: 'v021',
       platform: '抖音', category: '审美提升',
       title: '字好看是练出来的，3 个结构',
       hook: '字丑不敢签名？练对结构 7 天见形。',
       fullText: '横平竖直先稳骨架、重心居中、间距均匀。每天 15 分钟临摹，我从狗爬到被要签名。审美藏在细节里。',
+      likes: '23.1万', saves: '18.4万',
+      whyFire: '技能类痛点+7天承诺',
+      reference: '把练字包装成审美微习惯',
+      videoUrl: 'https://www.douyin.com/video/7517102058677891234',
       timeline: [
         { t: '0-2s', k: '钩子', d: '丑字vs美字' },
         { t: '2-8s', k: '痛点', d: '自卑字丑' },
@@ -2293,13 +2440,6 @@ input, textarea, select { font-family: inherit; }
     if (!url) return `<span class="jump-btn empty">＋ 加跟练视频</span>`;
     return `<a class="jump-btn" href="${esc(url)}" target="_blank" rel="noopener">${esc(label || '▶ 跳转跟练')}</a>`;
   }
-  // 跳转原文：抖音/小红书不允许内嵌原文，这里跳转到对应平台的该话题搜索，便于找到原帖
-  function originalUrl(platform, kw) {
-    const q = encodeURIComponent(kw || '');
-    if (platform === '抖音') return 'https://www.douyin.com/search/' + q;
-    if (platform === '小红书') return 'https://www.xiaohongshu.com/search_result?keyword=' + q;
-    return 'https://www.baidu.com/s?wd=' + q;
-  }
   function emptyHint(msg) { return `<div class="empty">${esc(msg)}</div>`; }
 
   /* ---------------- 顶栏/问候 ---------------- */
@@ -2652,21 +2792,30 @@ input, textarea, select { font-family: inherit; }
     } else {
       ui.viralItems = S.DB.viral.items;
     }
-    const cards = ui.viralItems.map((v, i) => `
-      <div class="viral-card">
-        <div class="viral-top">
-          <div class="vt-platform">${v.platform} · ${v.category}</div>
-          <div class="vt-title">${esc(v.title)}</div>
-        </div>
-        <div class="viral-body">
-          <div class="row" style="flex:none;align-items:center">
-            <button class="btn ghost sm" data-action="viral-detail" data-i="${i}">🔍 查看完整脚本拆解</button>
-            ${jumpBtn(originalUrl(v.platform, v.title), '🔗 跳转原文').replace('jump-btn', 'jump-btn sm')}
+    const favCount = S.DB.viralFavs.length;
+    const cards = ui.viralItems.map((v, i) => {
+      const fav = S.isViralFav(v.id);
+      return `
+      <div class="viral-card ${fav ? 'faved' : ''}">
+        <button class="viral-fav ${fav ? 'on' : ''}" data-action="viral-fav" data-id="${esc(v.id)}" title="加入收藏">
+          <span class="vf-ico">${fav ? '★' : '☆'}</span>
+          <span class="vf-txt">${fav ? '已收藏' : '收藏'}</span>
+        </button>
+        <div class="viral-main">
+          <div class="viral-top">
+            <span class="vt-platform">${v.platform} · ${v.category}</span>
+            <span class="vt-meta">❤ ${esc(v.likes || '—')}　⭐ ${esc(v.saves || '—')}</span>
           </div>
+          <div class="vt-title">${esc(v.title)}</div>
           <div class="viral-sec"><h5>钩子文案</h5><div class="line">${esc(v.hook)}</div></div>
           <div class="viral-sec"><h5>爆火逻辑</h5><div class="line">${esc(v.logic)}</div></div>
+          <div class="viral-actions">
+            <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" title="${esc(v.platform)}原视频">▶ 看相关视频</a>
+            <button class="btn ghost sm" data-action="viral-detail" data-i="${i}">🔍 完整拆解</button>
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     const html = `
       <div class="view-head">
         <div><div class="view-title">爆款灵感</div><div class="view-desc">每天 9:00 自动更新 · 不满意可手动刷新</div></div>
@@ -2674,7 +2823,8 @@ input, textarea, select { font-family: inherit; }
       </div>
       <div class="viral-toolbar">
         <span class="chip">🔥 今日 ${ui.viralItems.length} 条</span>
-        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点卡片查看 6 段式脚本拆解，🔗 跳转原文去平台找原帖。</span>
+        <span class="chip">⭐ 收藏 ${favCount}</span>
+        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点「收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
       </div>
       <div class="grid grid-2">${cards}</div>`;
     mount(html);
@@ -2683,23 +2833,73 @@ input, textarea, select { font-family: inherit; }
   function viralDetail(i) {
     const v = ui.viralItems[i];
     if (!v) return;
-    const tl = v.timeline.map((x) => `<div class="tl"><span class="t">${esc(x.t)}</span><span><span class="k">【${esc(x.k)}】</span>${esc(x.d)}</span></div>`).join('');
+    const fav = S.isViralFav(v.id);
+    const tl = v.timeline.map((x) => `<div class="tl"><span class="t">${esc(x.t)}</span><span><span class="k k-${esc(x.k)}">${esc(x.k)}</span>${esc(x.d)}</span></div>`).join('');
+    // 文案：金句/情绪词高亮（提取引号内内容 + 标注显眼的情绪词）
+    const emotionWords = ['爽', '治愈', '焦虑', '共鸣', '松弛', '高级', '逆袭', '满足', '崩溃', '紧绷', '清醒', '通透', '香', '爽感', '自豪', '自卑', '轻松', '欢喜'];
+    let ftHTML = esc(v.fullText);
+    // 先高亮引号内容
+    ftHTML = ftHTML.replace(/[「」“”]/g, (m) => `<span class="gold">${m}</span>`);
+    // 再高亮情绪词
+    emotionWords.forEach((w) => { ftHTML = ftHTML.split(w).join(`<span class="emo-word">${w}</span>`); });
     const body = `
-      <div class="viral-top" style="border-radius:14px;padding:14px;margin-bottom:12px">
+      <div class="viral-top" style="border-radius:14px;padding:14px;margin-bottom:14px">
         <div class="vt-platform">${v.platform} · ${v.category}</div>
         <div class="vt-title">${esc(v.title)}</div>
-        <div style="margin-top:10px">${jumpBtn(originalUrl(v.platform, v.title), '🔗 跳转原文去平台找原帖')}</div>
+        <div class="viral-detail-meta">
+          <span>❤ 点赞 ${esc(v.likes || '—')}</span>
+          <span>⭐ 收藏 ${esc(v.saves || '—')}</span>
+          <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener">▶ 看原视频</a>
+          <button class="btn ghost sm" data-action="viral-fav" data-id="${esc(v.id)}" data-from-modal="1">${fav ? '★ 已收藏' : '☆ 加入收藏'}</button>
+        </div>
       </div>
-      <div class="viral-sec"><h5>1、逐秒标注（钩子/痛点/干货/反转/高潮/结尾）</h5><div class="timeline">${tl}</div></div>
-      <div class="viral-sec"><h5>2、文案（全文案 + 金句/情绪词）</h5>
-        <div class="line">${esc(v.fullText).replace(/「|」/g, (m) => `<span class="gold">${m}</span>`)}</div>
-        <div class="line" style="margin-top:6px"><span class="emo">金句：</span><span class="gold">${esc(v.hook)}</span></div>
+
+      <div class="viral-step">
+        <div class="step-no">1</div>
+        <div class="step-body">
+          <h5>逐秒标注（钩子 / 痛点 / 干货 / 反转 / 高潮 / 结尾）</h5>
+          <div class="timeline">${tl}</div>
+        </div>
       </div>
-      <div class="viral-sec"><h5>3、画面（镜头/景别/运镜/字幕）</h5><div class="line">${esc(v.visuals)}</div></div>
-      <div class="viral-sec"><h5>4、音频（BGM/卡点/音效）</h5><div class="line">${esc(v.audio)}</div></div>
-      <div class="viral-sec"><h5>5、爆火逻辑（痛点/共鸣/传播点）</h5><div class="line">${esc(v.logic)}</div></div>
-      <div class="viral-sec"><h5>6、可直接仿写脚本模板</h5><div class="line">${esc(v.template)}</div></div>
-      <p class="muted" style="margin-top:8px">提示：文案金句已高亮，照此结构二创即可。</p>`;
+
+      <div class="viral-step">
+        <div class="step-no">2</div>
+        <div class="step-body">
+          <h5>文案（全文案 + 金句 / 情绪词）</h5>
+          <div class="line">${ftHTML}</div>
+          <div class="line" style="margin-top:8px"><span class="emo">金句：</span><span class="gold">${esc(v.hook)}</span></div>
+        </div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">3</div>
+        <div class="step-body"><h5>画面（镜头 / 景别 / 运镜 / 字幕）</h5><div class="line">${esc(v.visuals)}</div></div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">4</div>
+        <div class="step-body"><h5>音频（BGM 名称 / 卡点位置 / 音效）</h5><div class="line">${esc(v.audio)}</div></div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">5</div>
+        <div class="step-body">
+          <h5>爆火逻辑（用户痛点 / 情绪共鸣 / 传播点）</h5>
+          <div class="line">${esc(v.logic)}</div>
+          ${v.whyFire ? `<div class="line" style="margin-top:8px"><span class="emo">为什么火：</span>${esc(v.whyFire)}</div>` : ''}
+          ${v.reference ? `<div class="line"><span class="emo">可借鉴：</span>${esc(v.reference)}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">6</div>
+        <div class="step-body">
+          <h5>输出：可直接仿写的脚本模板（含时长 / 画面 / 文案 / BGM）</h5>
+          <div class="line tpl">${esc(v.template)}</div>
+        </div>
+      </div>
+
+      <p class="muted" style="margin-top:10px">提示：文案金句「」已高亮、情绪词已标色，照此 6 步结构二创即可。</p>`;
     openModal('📋 脚本拆解 · ' + v.title, body);
   }
 
@@ -3145,6 +3345,13 @@ input, textarea, select { font-family: inherit; }
       // 爆款
       case 'viral-refresh': { ui.viralItems = Viral.generate(true); toast('已换一批灵感'); renderViral(); break; }
       case 'viral-detail': viralDetail(parseInt(t.dataset.i, 10)); break;
+      case 'viral-fav': {
+        const on = S.toggleViralFav(id);
+        toast(on ? '已收藏 ★' : '已取消收藏');
+        if (ui.view === 'viral') renderViral();
+        if (t.dataset.fromModal) { t.textContent = on ? '★ 已收藏' : '☆ 加入收藏'; t.classList.toggle('on', on); }
+        break;
+      }
       // 茶饮管家
       case 'tea-search': doTeaSearch(); break;
       case 'tea-clear-search': ui.teaQuery = ''; renderTea(); break;

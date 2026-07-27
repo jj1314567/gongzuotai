@@ -45,6 +45,7 @@
         records: {},        // date -> {skills, quiz, quizScore, videos, done}
       },
       viral: { date: '', items: [] },
+      viralFavs: [], // 爆款灵感收藏（独立存放，避免被每日 generate 覆盖）
       tea: { favorites: [], week: { start: '', plan: {} } }, // 茶饮管家：收藏id / 周计划
       settings: { theme: 'purple', name: '小主' },
     };
@@ -279,6 +280,16 @@
     document.documentElement.setAttribute('data-theme', DB.settings.theme || 'purple');
   }
 
+  /* ---------- 爆款灵感收藏 ---------- */
+  function isViralFav(id) { return DB.viralFavs.includes(id); }
+  function toggleViralFav(id) {
+    const i = DB.viralFavs.indexOf(id);
+    if (i >= 0) DB.viralFavs.splice(i, 1); else DB.viralFavs.push(id);
+    save();
+    return isViralFav(id);
+  }
+  function getViralFavs() { return DB.viralFavs.slice(); }
+
   /* ---------- 茶饮管家 ---------- */
   function isTeaFav(id) { return DB.tea.favorites.includes(id); }
   function toggleTeaFav(id) {
@@ -331,6 +342,7 @@
     addPlan, updatePlan, removePlan, plansOn,
     setFrenchLevel, recordFrench, getFrench, ensureFrenchRec, setFrenchSkillItem, getFrenchSkillItem, setFrenchWriteText, frenchSkillProgress, frenchDone, completeFrenchToday, toggleFrench, setFrenchVideo,
     setTheme, applyTheme,
+    isViralFav, toggleViralFav, getViralFavs,
     isTeaFav, toggleTeaFav, setTeaDay, clearTeaDay, getTeaPlan,
     todaySummary, exportData, importData,
   };

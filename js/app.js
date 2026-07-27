@@ -40,13 +40,6 @@
     if (!url) return `<span class="jump-btn empty">＋ 加跟练视频</span>`;
     return `<a class="jump-btn" href="${esc(url)}" target="_blank" rel="noopener">${esc(label || '▶ 跳转跟练')}</a>`;
   }
-  // 跳转原文：抖音/小红书不允许内嵌原文，这里跳转到对应平台的该话题搜索，便于找到原帖
-  function originalUrl(platform, kw) {
-    const q = encodeURIComponent(kw || '');
-    if (platform === '抖音') return 'https://www.douyin.com/search/' + q;
-    if (platform === '小红书') return 'https://www.xiaohongshu.com/search_result?keyword=' + q;
-    return 'https://www.baidu.com/s?wd=' + q;
-  }
   function emptyHint(msg) { return `<div class="empty">${esc(msg)}</div>`; }
 
   /* ---------------- 顶栏/问候 ---------------- */
@@ -399,21 +392,30 @@
     } else {
       ui.viralItems = S.DB.viral.items;
     }
-    const cards = ui.viralItems.map((v, i) => `
-      <div class="viral-card">
-        <div class="viral-top">
-          <div class="vt-platform">${v.platform} · ${v.category}</div>
-          <div class="vt-title">${esc(v.title)}</div>
-        </div>
-        <div class="viral-body">
-          <div class="row" style="flex:none;align-items:center">
-            <button class="btn ghost sm" data-action="viral-detail" data-i="${i}">🔍 查看完整脚本拆解</button>
-            ${jumpBtn(originalUrl(v.platform, v.title), '🔗 跳转原文').replace('jump-btn', 'jump-btn sm')}
+    const favCount = S.DB.viralFavs.length;
+    const cards = ui.viralItems.map((v, i) => {
+      const fav = S.isViralFav(v.id);
+      return `
+      <div class="viral-card ${fav ? 'faved' : ''}">
+        <button class="viral-fav ${fav ? 'on' : ''}" data-action="viral-fav" data-id="${esc(v.id)}" title="加入收藏">
+          <span class="vf-ico">${fav ? '★' : '☆'}</span>
+          <span class="vf-txt">${fav ? '已收藏' : '收藏'}</span>
+        </button>
+        <div class="viral-main">
+          <div class="viral-top">
+            <span class="vt-platform">${v.platform} · ${v.category}</span>
+            <span class="vt-meta">❤ ${esc(v.likes || '—')}　⭐ ${esc(v.saves || '—')}</span>
           </div>
+          <div class="vt-title">${esc(v.title)}</div>
           <div class="viral-sec"><h5>钩子文案</h5><div class="line">${esc(v.hook)}</div></div>
           <div class="viral-sec"><h5>爆火逻辑</h5><div class="line">${esc(v.logic)}</div></div>
+          <div class="viral-actions">
+            <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" title="${esc(v.platform)}原视频">▶ 看相关视频</a>
+            <button class="btn ghost sm" data-action="viral-detail" data-i="${i}">🔍 完整拆解</button>
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;
+    }).join('');
     const html = `
       <div class="view-head">
         <div><div class="view-title">爆款灵感</div><div class="view-desc">每天 9:00 自动更新 · 不满意可手动刷新</div></div>
@@ -421,7 +423,8 @@
       </div>
       <div class="viral-toolbar">
         <span class="chip">🔥 今日 ${ui.viralItems.length} 条</span>
-        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点卡片查看 6 段式脚本拆解，🔗 跳转原文去平台找原帖。</span>
+        <span class="chip">⭐ 收藏 ${favCount}</span>
+        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点「收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
       </div>
       <div class="grid grid-2">${cards}</div>`;
     mount(html);
@@ -430,23 +433,73 @@
   function viralDetail(i) {
     const v = ui.viralItems[i];
     if (!v) return;
-    const tl = v.timeline.map((x) => `<div class="tl"><span class="t">${esc(x.t)}</span><span><span class="k">【${esc(x.k)}】</span>${esc(x.d)}</span></div>`).join('');
+    const fav = S.isViralFav(v.id);
+    const tl = v.timeline.map((x) => `<div class="tl"><span class="t">${esc(x.t)}</span><span><span class="k k-${esc(x.k)}">${esc(x.k)}</span>${esc(x.d)}</span></div>`).join('');
+    // 文案：金句/情绪词高亮（提取引号内内容 + 标注显眼的情绪词）
+    const emotionWords = ['爽', '治愈', '焦虑', '共鸣', '松弛', '高级', '逆袭', '满足', '崩溃', '紧绷', '清醒', '通透', '香', '爽感', '自豪', '自卑', '轻松', '欢喜'];
+    let ftHTML = esc(v.fullText);
+    // 先高亮引号内容
+    ftHTML = ftHTML.replace(/[「」“”]/g, (m) => `<span class="gold">${m}</span>`);
+    // 再高亮情绪词
+    emotionWords.forEach((w) => { ftHTML = ftHTML.split(w).join(`<span class="emo-word">${w}</span>`); });
     const body = `
-      <div class="viral-top" style="border-radius:14px;padding:14px;margin-bottom:12px">
+      <div class="viral-top" style="border-radius:14px;padding:14px;margin-bottom:14px">
         <div class="vt-platform">${v.platform} · ${v.category}</div>
         <div class="vt-title">${esc(v.title)}</div>
-        <div style="margin-top:10px">${jumpBtn(originalUrl(v.platform, v.title), '🔗 跳转原文去平台找原帖')}</div>
+        <div class="viral-detail-meta">
+          <span>❤ 点赞 ${esc(v.likes || '—')}</span>
+          <span>⭐ 收藏 ${esc(v.saves || '—')}</span>
+          <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener">▶ 看原视频</a>
+          <button class="btn ghost sm" data-action="viral-fav" data-id="${esc(v.id)}" data-from-modal="1">${fav ? '★ 已收藏' : '☆ 加入收藏'}</button>
+        </div>
       </div>
-      <div class="viral-sec"><h5>1、逐秒标注（钩子/痛点/干货/反转/高潮/结尾）</h5><div class="timeline">${tl}</div></div>
-      <div class="viral-sec"><h5>2、文案（全文案 + 金句/情绪词）</h5>
-        <div class="line">${esc(v.fullText).replace(/「|」/g, (m) => `<span class="gold">${m}</span>`)}</div>
-        <div class="line" style="margin-top:6px"><span class="emo">金句：</span><span class="gold">${esc(v.hook)}</span></div>
+
+      <div class="viral-step">
+        <div class="step-no">1</div>
+        <div class="step-body">
+          <h5>逐秒标注（钩子 / 痛点 / 干货 / 反转 / 高潮 / 结尾）</h5>
+          <div class="timeline">${tl}</div>
+        </div>
       </div>
-      <div class="viral-sec"><h5>3、画面（镜头/景别/运镜/字幕）</h5><div class="line">${esc(v.visuals)}</div></div>
-      <div class="viral-sec"><h5>4、音频（BGM/卡点/音效）</h5><div class="line">${esc(v.audio)}</div></div>
-      <div class="viral-sec"><h5>5、爆火逻辑（痛点/共鸣/传播点）</h5><div class="line">${esc(v.logic)}</div></div>
-      <div class="viral-sec"><h5>6、可直接仿写脚本模板</h5><div class="line">${esc(v.template)}</div></div>
-      <p class="muted" style="margin-top:8px">提示：文案金句已高亮，照此结构二创即可。</p>`;
+
+      <div class="viral-step">
+        <div class="step-no">2</div>
+        <div class="step-body">
+          <h5>文案（全文案 + 金句 / 情绪词）</h5>
+          <div class="line">${ftHTML}</div>
+          <div class="line" style="margin-top:8px"><span class="emo">金句：</span><span class="gold">${esc(v.hook)}</span></div>
+        </div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">3</div>
+        <div class="step-body"><h5>画面（镜头 / 景别 / 运镜 / 字幕）</h5><div class="line">${esc(v.visuals)}</div></div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">4</div>
+        <div class="step-body"><h5>音频（BGM 名称 / 卡点位置 / 音效）</h5><div class="line">${esc(v.audio)}</div></div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">5</div>
+        <div class="step-body">
+          <h5>爆火逻辑（用户痛点 / 情绪共鸣 / 传播点）</h5>
+          <div class="line">${esc(v.logic)}</div>
+          ${v.whyFire ? `<div class="line" style="margin-top:8px"><span class="emo">为什么火：</span>${esc(v.whyFire)}</div>` : ''}
+          ${v.reference ? `<div class="line"><span class="emo">可借鉴：</span>${esc(v.reference)}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="viral-step">
+        <div class="step-no">6</div>
+        <div class="step-body">
+          <h5>输出：可直接仿写的脚本模板（含时长 / 画面 / 文案 / BGM）</h5>
+          <div class="line tpl">${esc(v.template)}</div>
+        </div>
+      </div>
+
+      <p class="muted" style="margin-top:10px">提示：文案金句「」已高亮、情绪词已标色，照此 6 步结构二创即可。</p>`;
     openModal('📋 脚本拆解 · ' + v.title, body);
   }
 
@@ -892,6 +945,13 @@
       // 爆款
       case 'viral-refresh': { ui.viralItems = Viral.generate(true); toast('已换一批灵感'); renderViral(); break; }
       case 'viral-detail': viralDetail(parseInt(t.dataset.i, 10)); break;
+      case 'viral-fav': {
+        const on = S.toggleViralFav(id);
+        toast(on ? '已收藏 ★' : '已取消收藏');
+        if (ui.view === 'viral') renderViral();
+        if (t.dataset.fromModal) { t.textContent = on ? '★ 已收藏' : '☆ 加入收藏'; t.classList.toggle('on', on); }
+        break;
+      }
       // 茶饮管家
       case 'tea-search': doTeaSearch(); break;
       case 'tea-clear-search': ui.teaQuery = ''; renderTea(); break;
