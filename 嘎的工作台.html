@@ -408,6 +408,7 @@ input, textarea, select { font-family: inherit; }
 .viral-sec h5 { font-size: 12.5px; color: var(--primary-deep); margin-bottom: 6px; letter-spacing: .3px; }
 .viral-sec .line { font-size: 13px; line-height: 1.65; color: var(--text); }
 .viral-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.viral-toolbar .btn.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 8px rgba(124,92,255,.28); }
 .viral-video-btn { display: inline-flex; align-items: center; gap: 4px; padding: 7px 13px; font-size: 12.5px; font-weight: 700; text-decoration: none; color: #fff; background: linear-gradient(135deg, #fb7299, #ff9bbf); border-radius: 999px; box-shadow: 0 2px 8px rgba(251,114,153,.28); transition: transform .12s ease, box-shadow .12s ease; }
 .viral-video-btn::before { content: '📺'; }
 .viral-video-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(251,114,153,.4); }
@@ -1221,18 +1222,20 @@ input, textarea, select { font-family: inherit; }
   // 模板结构：id / platform / category / title / hook / fullText /
   // likes / saves / whyFire / reference / videoUrl（原视频直链）/
   // timeline(逐秒标注) / visuals(画面) / audio(音频) / logic(爆火逻辑) / template(可仿写脚本)
+  // 抖音类：videoUrl 为真实视频直链(douyin.com/video/ID)
+  // 小红书类：searchKw 为检索词，加载时拼成 search_result 链接（小红书禁止外链直跳，搜索词可稳定抵达原笔记）
   const POOL = [
     /* ---------------- 养生类 ---------------- */
     {
       id: 'v001',
-      platform: '小红书', category: '养生',
+      platform: '抖音', category: '养生',
       title: '拍八虚 21 天，我的淤堵脸终于通透了',
       hook: '你每天累得像被抽干，可能不是缺觉，是「堵」了。',
       fullText: '以前我以为疲劳就是没睡够，后来才知道气血淤堵才是元凶。坚持拍八虚 21 天：肘窝、腋窝、腹股沟、腘窝，每个 30 下。第一周只想放弃，第二周睡觉变沉，第三周素颜都被夸气色好。养生不是玄学，是每天 5 分钟对自己好一点。',
       likes: '31.8万', saves: '20.1万',
       whyFire: '自带冲突、吐槽极易爆',
       reference: '叠加女性成长观点口播，双赛道',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66a1b2c3d4e5f6070809a0b1',
+      videoUrl: 'https://www.douyin.com/video/7580180306948622693',
       timeline: [
         { t: '0-3s', k: '钩子', d: '对准镜子素颜特写，抛出"累不是缺觉是堵了"' },
         { t: '3-8s', k: '痛点', d: '列举疲惫/暗沉/失眠等真实困扰' },
@@ -1255,7 +1258,7 @@ input, textarea, select { font-family: inherit; }
       likes: '21.7万', saves: '5.5万',
       whyFire: '反常识钩子+身份认同',
       reference: '前置结果：先讲逆袭成果再倒推',
-      videoUrl: 'https://www.douyin.com/video/7385291047567891234',
+      videoUrl: 'https://www.douyin.com/video/7666969033376308937',
       timeline: [
         { t: '0-2s', k: '钩子', d: '快剪错误动作+大字"做错=白练"' },
         { t: '2-6s', k: '痛点', d: '自嘲练半年没效果' },
@@ -1278,7 +1281,7 @@ input, textarea, select { font-family: inherit; }
       likes: '55.7万', saves: '28.7万',
       whyFire: '痛点精准、高收藏',
       reference: '结合你从内耗到搞钱的亲身转变讲',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66b3c4d5e6f7080910a1b2c3',
+      searchKw: '睡前仙人揉腹 改善便秘睡眠',
       timeline: [
         { t: '0-3s', k: '钩子', d: '躺姿暖光特写+反问' },
         { t: '3-10s', k: '痛点', d: '便秘/小肚子/气色' },
@@ -1301,7 +1304,7 @@ input, textarea, select { font-family: inherit; }
       likes: '18.3万', saves: '9.6万',
       whyFire: '前后对比强、视觉冲击',
       reference: '用"最便宜的医美"做价值锚点',
-      videoUrl: 'https://www.douyin.com/video/7398472058678902345',
+      videoUrl: 'https://www.douyin.com/video/7666854014260310976',
       timeline: [
         { t: '0-2s', k: '钩子', d: '侧身对比"含胸vs挺拔"' },
         { t: '2-8s', k: '痛点', d: '显廉价/没气质' },
@@ -1324,7 +1327,7 @@ input, textarea, select { font-family: inherit; }
       likes: '42.1万', saves: '33.4万',
       whyFire: '精准场景+高收藏方子',
       reference: '把"内调外养"做成系列选题',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66c5d6e7f8091011a2b3c4d5',
+      searchKw: '阴虚火旺 银耳百合莲子羹 内调',
       timeline: [
         { t: '0-3s', k: '钩子', d: '深夜手机光+干皮特写' },
         { t: '3-9s', k: '痛点', d: '起皮/卡粉/火旺' },
@@ -1347,7 +1350,7 @@ input, textarea, select { font-family: inherit; }
       likes: '36.5万', saves: '15.2万',
       whyFire: '民间验方+强结果承诺',
       reference: '用"三十年浅眠"建立信任背书',
-      videoUrl: 'https://www.douyin.com/video/7411653169789013456',
+      videoUrl: 'https://www.douyin.com/video/7597828671861260751',
       timeline: [
         { t: '0-2s', k: '钩子', d: '闹钟特写+黑眼圈' },
         { t: '2-7s', k: '痛点', d: '浅眠/黑眼圈' },
@@ -1370,7 +1373,7 @@ input, textarea, select { font-family: inherit; }
       likes: '28.9万', saves: '22.7万',
       whyFire: '对标奶茶、低门槛替代',
       reference: '戒瘾+变美双线叙事',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66d7e8f90a1b1213c4d5e6f7',
+      searchKw: '炒薏米 茯苓 陈皮 祛湿茶',
       timeline: [
         { t: '0-3s', k: '钩子', d: '奶茶vs茶水分屏' },
         { t: '3-9s', k: '痛点', d: '虚胖/脸肿' },
@@ -1393,7 +1396,7 @@ input, textarea, select { font-family: inherit; }
       likes: '24.6万', saves: '18.9万',
       whyFire: '强痛点+实用自救',
       reference: '把"老祖宗礼物"做成记忆点',
-      videoUrl: 'https://www.douyin.com/video/7424834280900124567',
+      videoUrl: 'https://www.douyin.com/video/7666720048014183718',
       timeline: [
         { t: '0-2s', k: '钩子', d: '蜷缩特写+痛点表情' },
         { t: '2-7s', k: '痛点', d: '痛经影响生活' },
@@ -1418,7 +1421,7 @@ input, textarea, select { font-family: inherit; }
       likes: '67.2万', saves: '41.3万',
       whyFire: '强身材痛点+显瘦承诺',
       reference: '直播间同款+3色选择制造转化',
-      videoUrl: 'https://www.douyin.com/video/7438015392011235678',
+      videoUrl: 'https://www.douyin.com/video/7666827939547333578',
       timeline: [
         { t: '0-2s', k: '钩子', d: '全身镜对比如实显瘦' },
         { t: '2-7s', k: '痛点', d: '腿粗胯宽焦虑' },
@@ -1441,7 +1444,7 @@ input, textarea, select { font-family: inherit; }
       likes: '38.4万', saves: '29.1万',
       whyFire: '反身高焦虑+可复用公式',
       reference: '7天不重样增加收藏理由',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66e9f0a1b2c3d4e5f6070809',
+      searchKw: '145小个子 通勤穿搭公式',
       timeline: [
         { t: '0-3s', k: '钩子', d: '小个子女生怼脸' },
         { t: '3-9s', k: '痛点', d: '显矮/撑不起气场' },
@@ -1464,7 +1467,7 @@ input, textarea, select { font-family: inherit; }
       likes: '45.7万', saves: '19.8万',
       whyFire: '局部身材痛点+低价',
       reference: '焦点转移法弱化身材短板',
-      videoUrl: 'https://www.douyin.com/video/7451196503122346789',
+      videoUrl: 'https://www.douyin.com/video/7666705895028730278',
       timeline: [
         { t: '0-2s', k: '钩子', d: '上半身特写转移焦点' },
         { t: '2-7s', k: '痛点', d: '梨形自卑' },
@@ -1487,7 +1490,7 @@ input, textarea, select { font-family: inherit; }
       likes: '22.3万', saves: '16.5万',
       whyFire: '职场场景+真实测评',
       reference: '两个月没塌建立耐用信任',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66f0a1b2c3d4e5f60708091a',
+      searchKw: '通勤托特包 测评 装电脑',
       timeline: [
         { t: '0-3s', k: '钩子', d: '帆布袋vs托特对比' },
         { t: '3-9s', k: '痛点', d: '不专业/装不下' },
@@ -1510,7 +1513,7 @@ input, textarea, select { font-family: inherit; }
       likes: '58.9万', saves: '35.6万',
       whyFire: '强效果可视化+省钱',
       reference: '3年老鞋对比增强真实感',
-      videoUrl: 'https://www.douyin.com/video/7464377614233457890',
+      videoUrl: 'https://www.douyin.com/video/7662810133080198454',
       timeline: [
         { t: '0-2s', k: '钩子', d: '发黄鞋怼脸' },
         { t: '2-7s', k: '痛点', d: '舍不得丢' },
@@ -1533,7 +1536,7 @@ input, textarea, select { font-family: inherit; }
       likes: '31.5万', saves: '27.2万',
       whyFire: '衣橱焦虑+胶囊衣橱概念',
       reference: '少而精理念引发收藏',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66a2b3c4d5e6f7080910a1b2',
+      searchKw: '基础款 穿出贵气感 胶囊衣橱',
       timeline: [
         { t: '0-3s', k: '钩子', d: '爆满衣柜俯拍' },
         { t: '3-9s', k: '痛点', d: '选择困难' },
@@ -1556,7 +1559,7 @@ input, textarea, select { font-family: inherit; }
       likes: '26.8万', saves: '14.3万',
       whyFire: '强功能型痛点+促销',
       reference: 'D杯真实试穿建立信任',
-      videoUrl: 'https://www.douyin.com/video/7477558725344568901',
+      videoUrl: 'https://www.douyin.com/video/7661658893466078491',
       timeline: [
         { t: '0-2s', k: '钩子', d: '侧身副乳特写' },
         { t: '2-7s', k: '痛点', d: '勒痕/副乳' },
@@ -1581,7 +1584,7 @@ input, textarea, select { font-family: inherit; }
       likes: '44.6万', saves: '38.9万',
       whyFire: '方法论可收藏+前后对比',
       reference: '5个心法做成系列可延展',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66b4c5d6e7f8091011a2b3c4',
+      searchKw: '普通人 高级感 配色公式',
       timeline: [
         { t: '0-3s', k: '钩子', d: '丑穿搭vs美穿搭分屏' },
         { t: '3-9s', k: '痛点', d: '土/乱' },
@@ -1604,7 +1607,7 @@ input, textarea, select { font-family: inherit; }
       likes: '33.2万', saves: '21.4万',
       whyFire: '技能可复制+结果反差',
       reference: '被约拍强化学习价值',
-      videoUrl: 'https://www.douyin.com/video/7490739836455679012',
+      videoUrl: 'https://www.douyin.com/shipin/7308338338438629395',
       timeline: [
         { t: '0-2s', k: '钩子', d: '随手拍vs杂志感对比' },
         { t: '2-8s', k: '痛点', d: '照片显廉价' },
@@ -1627,7 +1630,7 @@ input, textarea, select { font-family: inherit; }
       likes: '29.7万', saves: '25.1万',
       whyFire: '快速出门+男性认可视角',
       reference: '5分钟公式适合通勤场景',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66c6d7e8f90a1b1213c4d5e6',
+      searchKw: '伪素颜 妆容 教程',
       timeline: [
         { t: '0-3s', k: '钩子', d: '浓妆vs伪素颜' },
         { t: '3-9s', k: '痛点', d: '假面/厚重' },
@@ -1650,7 +1653,7 @@ input, textarea, select { font-family: inherit; }
       likes: '41.5万', saves: '36.7万',
       whyFire: '电影名场面+片单价值',
       reference: '每周一部可做系列选题',
-      videoUrl: 'https://www.douyin.com/video/7503920947566780123',
+      videoUrl: 'https://www.douyin.com/video/7645608449014828314',
       timeline: [
         { t: '0-2s', k: '钩子', d: '电影名场面混剪' },
         { t: '2-8s', k: '痛点', d: '审美贫瘠' },
@@ -1673,7 +1676,7 @@ input, textarea, select { font-family: inherit; }
       likes: '19.8万', saves: '17.6万',
       whyFire: '低成本改造+出租屋场景',
       reference: '三层灯光法可复制到家',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66d8e9f0a1b2c3d4e5f60708',
+      searchKw: '小户型 氛围感 灯光 3000K',
       timeline: [
         { t: '0-3s', k: '钩子', d: '冷白顶灯vs暖光对比' },
         { t: '3-9s', k: '痛点', d: '出租屋廉价' },
@@ -1696,7 +1699,7 @@ input, textarea, select { font-family: inherit; }
       likes: '23.1万', saves: '18.4万',
       whyFire: '技能类痛点+7天承诺',
       reference: '把练字包装成审美微习惯',
-      videoUrl: 'https://www.douyin.com/video/7517102058677891234',
+      videoUrl: 'https://www.douyin.com/video/7497548100593519924',
       timeline: [
         { t: '0-2s', k: '钩子', d: '丑字vs美字' },
         { t: '2-8s', k: '痛点', d: '自卑字丑' },
@@ -1711,6 +1714,13 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】35s｜【画面】丑字→结构→被要签名｜【文案】"练对结构7天见形"｜【BGM】古琴',
     },
   ];
+
+  // 小红书类用检索词拼成 search_result 链接（小红书禁止外链直跳，搜索词可稳定抵达原笔记/视频）
+  POOL.forEach((p) => {
+    if (p.searchKw && !p.videoUrl) {
+      p.videoUrl = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(p.searchKw);
+    }
+  });
 
   function shuffle(arr) {
     const a = arr.slice();
@@ -2415,6 +2425,7 @@ input, textarea, select { font-family: inherit; }
     view: 'overview',
     postureCat: null,
     viralItems: [],
+    viralFavOnly: false,
     frenchDate: S.todayStr(),
     calMonth: new Date(),
     teaWeekStart: null,
@@ -2454,8 +2465,11 @@ input, textarea, select { font-family: inherit; }
   }
 
   /* ---------------- 路由 ---------------- */
+  const VALID_VIEWS = ['overview', 'health', 'posture', 'recipe', 'diary', 'viral', 'french', 'tea', 'calendar', 'settings'];
   function switchView(v) {
+    if (!VALID_VIEWS.includes(v)) v = 'overview';
     ui.view = v;
+    try { localStorage.setItem('gw_lastview', v); } catch (e) {}
     $$('.nav-item').forEach((n) => n.classList.toggle('active', n.dataset.view === v));
     const map = {
       overview: renderOverview, health: renderHealth, posture: renderPosture,
@@ -2792,6 +2806,7 @@ input, textarea, select { font-family: inherit; }
     } else {
       ui.viralItems = S.DB.viral.items;
     }
+    if (ui.viralFavOnly) ui.viralItems = ui.viralItems.filter((v) => S.isViralFav(v.id));
     const favCount = S.DB.viralFavs.length;
     const cards = ui.viralItems.map((v, i) => {
       const fav = S.isViralFav(v.id);
@@ -2810,7 +2825,7 @@ input, textarea, select { font-family: inherit; }
           <div class="viral-sec"><h5>钩子文案</h5><div class="line">${esc(v.hook)}</div></div>
           <div class="viral-sec"><h5>爆火逻辑</h5><div class="line">${esc(v.logic)}</div></div>
           <div class="viral-actions">
-            <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" title="${esc(v.platform)}原视频">▶ 看相关视频</a>
+            <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" data-action="viral-video" data-url="${esc(v.videoUrl)}" title="${esc(v.platform)}原视频">看相关视频</a>
             <button class="btn ghost sm" data-action="viral-detail" data-i="${i}">🔍 完整拆解</button>
           </div>
         </div>
@@ -2822,11 +2837,14 @@ input, textarea, select { font-family: inherit; }
         <button class="btn" data-action="viral-refresh">🔄 换一批</button>
       </div>
       <div class="viral-toolbar">
-        <span class="chip">🔥 今日 ${ui.viralItems.length} 条</span>
+        <span class="chip">🔥 今日 ${S.DB.viral.items.length} 条</span>
         <span class="chip">⭐ 收藏 ${favCount}</span>
-        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点「收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
+        <button class="btn ghost sm ${ui.viralFavOnly ? 'on' : ''}" data-action="viral-favonly">${ui.viralFavOnly ? '✓ 只看收藏' : '⭐ 只看收藏'}</button>
+        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
       </div>
-      <div class="grid grid-2">${cards}</div>`;
+      ${ui.viralFavOnly && ui.viralItems.length === 0
+        ? `<div class="empty">还没有收藏任何灵感 🤔 点卡片左侧「☆ 收藏」即可在这里集中查看 ✨</div>`
+        : `<div class="grid grid-2">${cards}</div>`}`;
     mount(html);
   }
 
@@ -2849,7 +2867,7 @@ input, textarea, select { font-family: inherit; }
         <div class="viral-detail-meta">
           <span>❤ 点赞 ${esc(v.likes || '—')}</span>
           <span>⭐ 收藏 ${esc(v.saves || '—')}</span>
-          <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener">▶ 看原视频</a>
+          <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" data-action="viral-video" data-url="${esc(v.videoUrl)}">看原视频</a>
           <button class="btn ghost sm" data-action="viral-fav" data-id="${esc(v.id)}" data-from-modal="1">${fav ? '★ 已收藏' : '☆ 加入收藏'}</button>
         </div>
       </div>
@@ -3343,8 +3361,14 @@ input, textarea, select { font-family: inherit; }
       case 'del-diary': { if (confirm('删除该日记？')) { S.removeDiary(id); renderDiary(); } break; }
       case 'toggle-plan': { const p = S.DB.plans.find((x) => x.id === id); if (p) { S.updatePlan(id, { done: !p.done }); } refreshTop(); renderOverview(); break; }
       // 爆款
-      case 'viral-refresh': { ui.viralItems = Viral.generate(true); toast('已换一批灵感'); renderViral(); break; }
+      case 'viral-refresh': { ui.viralFavOnly = false; ui.viralItems = Viral.generate(true); toast('已换一批灵感'); renderViral(); break; }
       case 'viral-detail': viralDetail(parseInt(t.dataset.i, 10)); break;
+      case 'viral-video': {
+        const url = t.dataset.url;
+        if (url) { e.preventDefault(); const w = window.open(url, '_blank'); if (!w) location.href = url; }
+        break;
+      }
+      case 'viral-favonly': ui.viralFavOnly = !ui.viralFavOnly; renderViral(); break;
       case 'viral-fav': {
         const on = S.toggleViralFav(id);
         toast(on ? '已收藏 ★' : '已取消收藏');
@@ -3610,7 +3634,9 @@ input, textarea, select { font-family: inherit; }
   /* ---------------- 启动 ---------------- */
   S.applyTheme();
   refreshTop();
-  switchView('overview');
+  let savedView = 'overview';
+  try { const sv = localStorage.getItem('gw_lastview'); if (sv && VALID_VIEWS.includes(sv)) savedView = sv; } catch (e) {}
+  switchView(savedView);
   maybeShowAppHint();
   // 每天 9:00 自动推送更新爆款（若页面常开，跨过 9 点会自动刷新并提示）
   autoRefreshViral();

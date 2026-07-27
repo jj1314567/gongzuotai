@@ -15,6 +15,7 @@
     view: 'overview',
     postureCat: null,
     viralItems: [],
+    viralFavOnly: false,
     frenchDate: S.todayStr(),
     calMonth: new Date(),
     teaWeekStart: null,
@@ -54,8 +55,11 @@
   }
 
   /* ---------------- 路由 ---------------- */
+  const VALID_VIEWS = ['overview', 'health', 'posture', 'recipe', 'diary', 'viral', 'french', 'tea', 'calendar', 'settings'];
   function switchView(v) {
+    if (!VALID_VIEWS.includes(v)) v = 'overview';
     ui.view = v;
+    try { localStorage.setItem('gw_lastview', v); } catch (e) {}
     $$('.nav-item').forEach((n) => n.classList.toggle('active', n.dataset.view === v));
     const map = {
       overview: renderOverview, health: renderHealth, posture: renderPosture,
@@ -392,6 +396,7 @@
     } else {
       ui.viralItems = S.DB.viral.items;
     }
+    if (ui.viralFavOnly) ui.viralItems = ui.viralItems.filter((v) => S.isViralFav(v.id));
     const favCount = S.DB.viralFavs.length;
     const cards = ui.viralItems.map((v, i) => {
       const fav = S.isViralFav(v.id);
@@ -410,7 +415,7 @@
           <div class="viral-sec"><h5>钩子文案</h5><div class="line">${esc(v.hook)}</div></div>
           <div class="viral-sec"><h5>爆火逻辑</h5><div class="line">${esc(v.logic)}</div></div>
           <div class="viral-actions">
-            <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" title="${esc(v.platform)}原视频">▶ 看相关视频</a>
+            <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" data-action="viral-video" data-url="${esc(v.videoUrl)}" title="${esc(v.platform)}原视频">看相关视频</a>
             <button class="btn ghost sm" data-action="viral-detail" data-i="${i}">🔍 完整拆解</button>
           </div>
         </div>
@@ -422,11 +427,14 @@
         <button class="btn" data-action="viral-refresh">🔄 换一批</button>
       </div>
       <div class="viral-toolbar">
-        <span class="chip">🔥 今日 ${ui.viralItems.length} 条</span>
+        <span class="chip">🔥 今日 ${S.DB.viral.items.length} 条</span>
         <span class="chip">⭐ 收藏 ${favCount}</span>
-        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点「收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
+        <button class="btn ghost sm ${ui.viralFavOnly ? 'on' : ''}" data-action="viral-favonly">${ui.viralFavOnly ? '✓ 只看收藏' : '⭐ 只看收藏'}</button>
+        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
       </div>
-      <div class="grid grid-2">${cards}</div>`;
+      ${ui.viralFavOnly && ui.viralItems.length === 0
+        ? `<div class="empty">还没有收藏任何灵感 🤔 点卡片左侧「☆ 收藏」即可在这里集中查看 ✨</div>`
+        : `<div class="grid grid-2">${cards}</div>`}`;
     mount(html);
   }
 
@@ -449,7 +457,7 @@
         <div class="viral-detail-meta">
           <span>❤ 点赞 ${esc(v.likes || '—')}</span>
           <span>⭐ 收藏 ${esc(v.saves || '—')}</span>
-          <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener">▶ 看原视频</a>
+          <a class="viral-video-btn" href="${esc(v.videoUrl)}" target="_blank" rel="noopener" data-action="viral-video" data-url="${esc(v.videoUrl)}">看原视频</a>
           <button class="btn ghost sm" data-action="viral-fav" data-id="${esc(v.id)}" data-from-modal="1">${fav ? '★ 已收藏' : '☆ 加入收藏'}</button>
         </div>
       </div>
@@ -943,8 +951,14 @@
       case 'del-diary': { if (confirm('删除该日记？')) { S.removeDiary(id); renderDiary(); } break; }
       case 'toggle-plan': { const p = S.DB.plans.find((x) => x.id === id); if (p) { S.updatePlan(id, { done: !p.done }); } refreshTop(); renderOverview(); break; }
       // 爆款
-      case 'viral-refresh': { ui.viralItems = Viral.generate(true); toast('已换一批灵感'); renderViral(); break; }
+      case 'viral-refresh': { ui.viralFavOnly = false; ui.viralItems = Viral.generate(true); toast('已换一批灵感'); renderViral(); break; }
       case 'viral-detail': viralDetail(parseInt(t.dataset.i, 10)); break;
+      case 'viral-video': {
+        const url = t.dataset.url;
+        if (url) { e.preventDefault(); const w = window.open(url, '_blank'); if (!w) location.href = url; }
+        break;
+      }
+      case 'viral-favonly': ui.viralFavOnly = !ui.viralFavOnly; renderViral(); break;
       case 'viral-fav': {
         const on = S.toggleViralFav(id);
         toast(on ? '已收藏 ★' : '已取消收藏');
@@ -1210,7 +1224,9 @@
   /* ---------------- 启动 ---------------- */
   S.applyTheme();
   refreshTop();
-  switchView('overview');
+  let savedView = 'overview';
+  try { const sv = localStorage.getItem('gw_lastview'); if (sv && VALID_VIEWS.includes(sv)) savedView = sv; } catch (e) {}
+  switchView(savedView);
   maybeShowAppHint();
   // 每天 9:00 自动推送更新爆款（若页面常开，跨过 9 点会自动刷新并提示）
   autoRefreshViral();

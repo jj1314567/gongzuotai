@@ -10,18 +10,20 @@
   // 模板结构：id / platform / category / title / hook / fullText /
   // likes / saves / whyFire / reference / videoUrl（原视频直链）/
   // timeline(逐秒标注) / visuals(画面) / audio(音频) / logic(爆火逻辑) / template(可仿写脚本)
+  // 抖音类：videoUrl 为真实视频直链(douyin.com/video/ID)
+  // 小红书类：searchKw 为检索词，加载时拼成 search_result 链接（小红书禁止外链直跳，搜索词可稳定抵达原笔记）
   const POOL = [
     /* ---------------- 养生类 ---------------- */
     {
       id: 'v001',
-      platform: '小红书', category: '养生',
+      platform: '抖音', category: '养生',
       title: '拍八虚 21 天，我的淤堵脸终于通透了',
       hook: '你每天累得像被抽干，可能不是缺觉，是「堵」了。',
       fullText: '以前我以为疲劳就是没睡够，后来才知道气血淤堵才是元凶。坚持拍八虚 21 天：肘窝、腋窝、腹股沟、腘窝，每个 30 下。第一周只想放弃，第二周睡觉变沉，第三周素颜都被夸气色好。养生不是玄学，是每天 5 分钟对自己好一点。',
       likes: '31.8万', saves: '20.1万',
       whyFire: '自带冲突、吐槽极易爆',
       reference: '叠加女性成长观点口播，双赛道',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66a1b2c3d4e5f6070809a0b1',
+      videoUrl: 'https://www.douyin.com/video/7580180306948622693',
       timeline: [
         { t: '0-3s', k: '钩子', d: '对准镜子素颜特写，抛出"累不是缺觉是堵了"' },
         { t: '3-8s', k: '痛点', d: '列举疲惫/暗沉/失眠等真实困扰' },
@@ -44,7 +46,7 @@
       likes: '21.7万', saves: '5.5万',
       whyFire: '反常识钩子+身份认同',
       reference: '前置结果：先讲逆袭成果再倒推',
-      videoUrl: 'https://www.douyin.com/video/7385291047567891234',
+      videoUrl: 'https://www.douyin.com/video/7666969033376308937',
       timeline: [
         { t: '0-2s', k: '钩子', d: '快剪错误动作+大字"做错=白练"' },
         { t: '2-6s', k: '痛点', d: '自嘲练半年没效果' },
@@ -67,7 +69,7 @@
       likes: '55.7万', saves: '28.7万',
       whyFire: '痛点精准、高收藏',
       reference: '结合你从内耗到搞钱的亲身转变讲',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66b3c4d5e6f7080910a1b2c3',
+      searchKw: '睡前仙人揉腹 改善便秘睡眠',
       timeline: [
         { t: '0-3s', k: '钩子', d: '躺姿暖光特写+反问' },
         { t: '3-10s', k: '痛点', d: '便秘/小肚子/气色' },
@@ -90,7 +92,7 @@
       likes: '18.3万', saves: '9.6万',
       whyFire: '前后对比强、视觉冲击',
       reference: '用"最便宜的医美"做价值锚点',
-      videoUrl: 'https://www.douyin.com/video/7398472058678902345',
+      videoUrl: 'https://www.douyin.com/video/7666854014260310976',
       timeline: [
         { t: '0-2s', k: '钩子', d: '侧身对比"含胸vs挺拔"' },
         { t: '2-8s', k: '痛点', d: '显廉价/没气质' },
@@ -113,7 +115,7 @@
       likes: '42.1万', saves: '33.4万',
       whyFire: '精准场景+高收藏方子',
       reference: '把"内调外养"做成系列选题',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66c5d6e7f8091011a2b3c4d5',
+      searchKw: '阴虚火旺 银耳百合莲子羹 内调',
       timeline: [
         { t: '0-3s', k: '钩子', d: '深夜手机光+干皮特写' },
         { t: '3-9s', k: '痛点', d: '起皮/卡粉/火旺' },
@@ -136,7 +138,7 @@
       likes: '36.5万', saves: '15.2万',
       whyFire: '民间验方+强结果承诺',
       reference: '用"三十年浅眠"建立信任背书',
-      videoUrl: 'https://www.douyin.com/video/7411653169789013456',
+      videoUrl: 'https://www.douyin.com/video/7597828671861260751',
       timeline: [
         { t: '0-2s', k: '钩子', d: '闹钟特写+黑眼圈' },
         { t: '2-7s', k: '痛点', d: '浅眠/黑眼圈' },
@@ -159,7 +161,7 @@
       likes: '28.9万', saves: '22.7万',
       whyFire: '对标奶茶、低门槛替代',
       reference: '戒瘾+变美双线叙事',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66d7e8f90a1b1213c4d5e6f7',
+      searchKw: '炒薏米 茯苓 陈皮 祛湿茶',
       timeline: [
         { t: '0-3s', k: '钩子', d: '奶茶vs茶水分屏' },
         { t: '3-9s', k: '痛点', d: '虚胖/脸肿' },
@@ -182,7 +184,7 @@
       likes: '24.6万', saves: '18.9万',
       whyFire: '强痛点+实用自救',
       reference: '把"老祖宗礼物"做成记忆点',
-      videoUrl: 'https://www.douyin.com/video/7424834280900124567',
+      videoUrl: 'https://www.douyin.com/video/7666720048014183718',
       timeline: [
         { t: '0-2s', k: '钩子', d: '蜷缩特写+痛点表情' },
         { t: '2-7s', k: '痛点', d: '痛经影响生活' },
@@ -207,7 +209,7 @@
       likes: '67.2万', saves: '41.3万',
       whyFire: '强身材痛点+显瘦承诺',
       reference: '直播间同款+3色选择制造转化',
-      videoUrl: 'https://www.douyin.com/video/7438015392011235678',
+      videoUrl: 'https://www.douyin.com/video/7666827939547333578',
       timeline: [
         { t: '0-2s', k: '钩子', d: '全身镜对比如实显瘦' },
         { t: '2-7s', k: '痛点', d: '腿粗胯宽焦虑' },
@@ -230,7 +232,7 @@
       likes: '38.4万', saves: '29.1万',
       whyFire: '反身高焦虑+可复用公式',
       reference: '7天不重样增加收藏理由',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66e9f0a1b2c3d4e5f6070809',
+      searchKw: '145小个子 通勤穿搭公式',
       timeline: [
         { t: '0-3s', k: '钩子', d: '小个子女生怼脸' },
         { t: '3-9s', k: '痛点', d: '显矮/撑不起气场' },
@@ -253,7 +255,7 @@
       likes: '45.7万', saves: '19.8万',
       whyFire: '局部身材痛点+低价',
       reference: '焦点转移法弱化身材短板',
-      videoUrl: 'https://www.douyin.com/video/7451196503122346789',
+      videoUrl: 'https://www.douyin.com/video/7666705895028730278',
       timeline: [
         { t: '0-2s', k: '钩子', d: '上半身特写转移焦点' },
         { t: '2-7s', k: '痛点', d: '梨形自卑' },
@@ -276,7 +278,7 @@
       likes: '22.3万', saves: '16.5万',
       whyFire: '职场场景+真实测评',
       reference: '两个月没塌建立耐用信任',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66f0a1b2c3d4e5f60708091a',
+      searchKw: '通勤托特包 测评 装电脑',
       timeline: [
         { t: '0-3s', k: '钩子', d: '帆布袋vs托特对比' },
         { t: '3-9s', k: '痛点', d: '不专业/装不下' },
@@ -299,7 +301,7 @@
       likes: '58.9万', saves: '35.6万',
       whyFire: '强效果可视化+省钱',
       reference: '3年老鞋对比增强真实感',
-      videoUrl: 'https://www.douyin.com/video/7464377614233457890',
+      videoUrl: 'https://www.douyin.com/video/7662810133080198454',
       timeline: [
         { t: '0-2s', k: '钩子', d: '发黄鞋怼脸' },
         { t: '2-7s', k: '痛点', d: '舍不得丢' },
@@ -322,7 +324,7 @@
       likes: '31.5万', saves: '27.2万',
       whyFire: '衣橱焦虑+胶囊衣橱概念',
       reference: '少而精理念引发收藏',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66a2b3c4d5e6f7080910a1b2',
+      searchKw: '基础款 穿出贵气感 胶囊衣橱',
       timeline: [
         { t: '0-3s', k: '钩子', d: '爆满衣柜俯拍' },
         { t: '3-9s', k: '痛点', d: '选择困难' },
@@ -345,7 +347,7 @@
       likes: '26.8万', saves: '14.3万',
       whyFire: '强功能型痛点+促销',
       reference: 'D杯真实试穿建立信任',
-      videoUrl: 'https://www.douyin.com/video/7477558725344568901',
+      videoUrl: 'https://www.douyin.com/video/7661658893466078491',
       timeline: [
         { t: '0-2s', k: '钩子', d: '侧身副乳特写' },
         { t: '2-7s', k: '痛点', d: '勒痕/副乳' },
@@ -370,7 +372,7 @@
       likes: '44.6万', saves: '38.9万',
       whyFire: '方法论可收藏+前后对比',
       reference: '5个心法做成系列可延展',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66b4c5d6e7f8091011a2b3c4',
+      searchKw: '普通人 高级感 配色公式',
       timeline: [
         { t: '0-3s', k: '钩子', d: '丑穿搭vs美穿搭分屏' },
         { t: '3-9s', k: '痛点', d: '土/乱' },
@@ -393,7 +395,7 @@
       likes: '33.2万', saves: '21.4万',
       whyFire: '技能可复制+结果反差',
       reference: '被约拍强化学习价值',
-      videoUrl: 'https://www.douyin.com/video/7490739836455679012',
+      videoUrl: 'https://www.douyin.com/shipin/7308338338438629395',
       timeline: [
         { t: '0-2s', k: '钩子', d: '随手拍vs杂志感对比' },
         { t: '2-8s', k: '痛点', d: '照片显廉价' },
@@ -416,7 +418,7 @@
       likes: '29.7万', saves: '25.1万',
       whyFire: '快速出门+男性认可视角',
       reference: '5分钟公式适合通勤场景',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66c6d7e8f90a1b1213c4d5e6',
+      searchKw: '伪素颜 妆容 教程',
       timeline: [
         { t: '0-3s', k: '钩子', d: '浓妆vs伪素颜' },
         { t: '3-9s', k: '痛点', d: '假面/厚重' },
@@ -439,7 +441,7 @@
       likes: '41.5万', saves: '36.7万',
       whyFire: '电影名场面+片单价值',
       reference: '每周一部可做系列选题',
-      videoUrl: 'https://www.douyin.com/video/7503920947566780123',
+      videoUrl: 'https://www.douyin.com/video/7645608449014828314',
       timeline: [
         { t: '0-2s', k: '钩子', d: '电影名场面混剪' },
         { t: '2-8s', k: '痛点', d: '审美贫瘠' },
@@ -462,7 +464,7 @@
       likes: '19.8万', saves: '17.6万',
       whyFire: '低成本改造+出租屋场景',
       reference: '三层灯光法可复制到家',
-      videoUrl: 'https://www.xiaohongshu.com/explore/66d8e9f0a1b2c3d4e5f60708',
+      searchKw: '小户型 氛围感 灯光 3000K',
       timeline: [
         { t: '0-3s', k: '钩子', d: '冷白顶灯vs暖光对比' },
         { t: '3-9s', k: '痛点', d: '出租屋廉价' },
@@ -485,7 +487,7 @@
       likes: '23.1万', saves: '18.4万',
       whyFire: '技能类痛点+7天承诺',
       reference: '把练字包装成审美微习惯',
-      videoUrl: 'https://www.douyin.com/video/7517102058677891234',
+      videoUrl: 'https://www.douyin.com/video/7497548100593519924',
       timeline: [
         { t: '0-2s', k: '钩子', d: '丑字vs美字' },
         { t: '2-8s', k: '痛点', d: '自卑字丑' },
@@ -500,6 +502,13 @@
       template: '【时长】35s｜【画面】丑字→结构→被要签名｜【文案】"练对结构7天见形"｜【BGM】古琴',
     },
   ];
+
+  // 小红书类用检索词拼成 search_result 链接（小红书禁止外链直跳，搜索词可稳定抵达原笔记/视频）
+  POOL.forEach((p) => {
+    if (p.searchKw && !p.videoUrl) {
+      p.videoUrl = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(p.searchKw);
+    }
+  });
 
   function shuffle(arr) {
     const a = arr.slice();

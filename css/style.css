@@ -393,6 +393,7 @@ input, textarea, select { font-family: inherit; }
 .viral-sec h5 { font-size: 12.5px; color: var(--primary-deep); margin-bottom: 6px; letter-spacing: .3px; }
 .viral-sec .line { font-size: 13px; line-height: 1.65; color: var(--text); }
 .viral-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 2px; }
+.viral-toolbar .btn.on { background: var(--primary); color: #fff; border-color: var(--primary); box-shadow: 0 2px 8px rgba(124,92,255,.28); }
 .viral-video-btn { display: inline-flex; align-items: center; gap: 4px; padding: 7px 13px; font-size: 12.5px; font-weight: 700; text-decoration: none; color: #fff; background: linear-gradient(135deg, #fb7299, #ff9bbf); border-radius: 999px; box-shadow: 0 2px 8px rgba(251,114,153,.28); transition: transform .12s ease, box-shadow .12s ease; }
 .viral-video-btn::before { content: '📺'; }
 .viral-video-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(251,114,153,.4); }
