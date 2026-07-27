@@ -1212,7 +1212,7 @@ input, textarea, select { font-family: inherit; }
 <script>
 /* ============================================================
    viral.js · 爆款灵感内容引擎
-   每日自动生成 10 条抖音/小红书爆款/带货脚本，可按 6 段架构拆解。
+   每日自动生成 10 条抖音爆款/带货脚本，可按 6 段架构拆解。
    说明：本引擎内置精选脚本模板库，离线即可生成与刷新；若接入 AI
    接口可替换为实时抓取+生成。当前为"最佳努力"离线版。
    ============================================================ */
@@ -1220,10 +1220,9 @@ input, textarea, select { font-family: inherit; }
   'use strict';
 
   // 模板结构：id / platform / category / title / hook / fullText /
-  // likes / saves / whyFire / reference / videoUrl（原视频直链）/
+  // likes / saves / whyFire / reference / videoUrl（原视频真实直链）/
   // timeline(逐秒标注) / visuals(画面) / audio(音频) / logic(爆火逻辑) / template(可仿写脚本)
-  // 抖音类：videoUrl 为真实视频直链(douyin.com/video/ID)
-  // 小红书类：searchKw 为检索词，加载时拼成 search_result 链接（小红书禁止外链直跳，搜索词可稳定抵达原笔记）
+  // 全部为抖音内容：videoUrl 均为真实视频直链(douyin.com/video/ID 或 douyin.com/shipin/ID)
   const POOL = [
     /* ---------------- 养生类 ---------------- */
     {
@@ -1274,14 +1273,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v003',
-      platform: '小红书', category: '养生',
+      platform: '抖音', category: '养生',
       title: '睡前仙人揉腹，肠道菌群都安静了',
       hook: '熬夜党便秘气色差？你缺的不是面膜是揉腹。',
       fullText: '每天睡前顺时针揉腹 100 下，掌心焐热再上手。刚开始咕噜咕噜响别怕，那是肠子在动。坚持一个月，排便规律了，小肚子也平了。中医说的"腹为五脏六腑之宫城"真不是唬人。',
       likes: '55.7万', saves: '28.7万',
       whyFire: '痛点精准、高收藏',
       reference: '结合你从内耗到搞钱的亲身转变讲',
-      searchKw: '睡前仙人揉腹 改善便秘睡眠',
+      videoUrl: 'https://www.douyin.com/video/7481513747698289977',
       timeline: [
         { t: '0-3s', k: '钩子', d: '躺姿暖光特写+反问' },
         { t: '3-10s', k: '痛点', d: '便秘/小肚子/气色' },
@@ -1320,14 +1319,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v005',
-      platform: '小红书', category: '养生',
+      platform: '抖音', category: '养生',
       title: '阴虚火旺熬夜脸，一碗汤喝回水润',
       hook: '凌晨两点还在刷手机？你的脸在报警。',
       fullText: '银耳百合莲子羹：银耳半朵泡发、百合 10g、莲子 15g、冰糖少许，小火炖 40 分钟出胶。每周 3 次，喝两周嘴角不起皮了，上妆不卡粉。内调外养，比敷十张面膜实在。',
       likes: '42.1万', saves: '33.4万',
       whyFire: '精准场景+高收藏方子',
       reference: '把"内调外养"做成系列选题',
-      searchKw: '阴虚火旺 银耳百合莲子羹 内调',
+      videoUrl: 'https://www.douyin.com/video/7585772346004737337',
       timeline: [
         { t: '0-3s', k: '钩子', d: '深夜手机光+干皮特写' },
         { t: '3-9s', k: '痛点', d: '起皮/卡粉/火旺' },
@@ -1366,14 +1365,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v007',
-      platform: '小红书', category: '养生',
+      platform: '抖音', category: '养生',
       title: '脾虚人自救：把奶茶换成它',
       hook: '天天奶茶脸肿虚胖？换一杯，两周小一圈。',
       fullText: '炒薏米 20g+茯苓 15g+陈皮 5g，煮水当茶喝。去湿气不寒凉，经期也能喝。我戒奶茶换它，下颌线都出来了。甜的不是罪，选错才受罪。',
       likes: '28.9万', saves: '22.7万',
       whyFire: '对标奶茶、低门槛替代',
       reference: '戒瘾+变美双线叙事',
-      searchKw: '炒薏米 茯苓 陈皮 祛湿茶',
+      videoUrl: 'https://www.douyin.com/video/6708678931395988749',
       timeline: [
         { t: '0-3s', k: '钩子', d: '奶茶vs茶水分屏' },
         { t: '3-9s', k: '痛点', d: '虚胖/脸肿' },
@@ -1437,14 +1436,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v010',
-      platform: '小红书', category: '穿搭带货',
+      platform: '抖音', category: '穿搭带货',
       title: '145 小个子通勤穿搭公式',
       hook: '矮个子的高级感，靠的是比例不是身高。',
       fullText: '上短下长+同色系+尖头鞋，视觉拉高 10cm。这件西装马甲我搭了 7 天不重样。链接在左下，学生党也买得起的质感。',
       likes: '38.4万', saves: '29.1万',
       whyFire: '反身高焦虑+可复用公式',
       reference: '7天不重样增加收藏理由',
-      searchKw: '145小个子 通勤穿搭公式',
+      videoUrl: 'https://www.douyin.com/video/7666858655891804022',
       timeline: [
         { t: '0-3s', k: '钩子', d: '小个子女生怼脸' },
         { t: '3-9s', k: '痛点', d: '显矮/撑不起气场' },
@@ -1483,14 +1482,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v012',
-      platform: '小红书', category: '穿搭带货',
+      platform: '抖音', category: '穿搭带货',
       title: '通勤包测评：装下电脑还显贵',
       hook: '背着帆布袋开会，专业感秒没。',
       fullText: '这只托特能装 14 寸电脑+水杯+化妆包，牛皮纹路显贵不贵。我背了两个月没塌。链接在评论区，职场新人值得。',
       likes: '22.3万', saves: '16.5万',
       whyFire: '职场场景+真实测评',
       reference: '两个月没塌建立耐用信任',
-      searchKw: '通勤托特包 测评 装电脑',
+      videoUrl: 'https://www.douyin.com/video/7644402508828342015',
       timeline: [
         { t: '0-3s', k: '钩子', d: '帆布袋vs托特对比' },
         { t: '3-9s', k: '痛点', d: '不专业/装不下' },
@@ -1529,14 +1528,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v014',
-      platform: '小红书', category: '穿搭带货',
+      platform: '抖音', category: '穿搭带货',
       title: '基础款穿出贵气感，3 件就够',
       hook: '衣柜爆满却没得穿？缺的是质感不是数量。',
       fullText: '白衬衫+直筒西裤+小羊皮乐福，三件搭出 10 种。面料选天丝醋酸，垂顺不皱。断舍离后才懂：少而精。',
       likes: '31.5万', saves: '27.2万',
       whyFire: '衣橱焦虑+胶囊衣橱概念',
       reference: '少而精理念引发收藏',
-      searchKw: '基础款 穿出贵气感 胶囊衣橱',
+      videoUrl: 'https://www.douyin.com/video/7640135339310740361',
       timeline: [
         { t: '0-3s', k: '钩子', d: '爆满衣柜俯拍' },
         { t: '3-9s', k: '痛点', d: '选择困难' },
@@ -1577,14 +1576,14 @@ input, textarea, select { font-family: inherit; }
     /* ---------------- 审美提升类 ---------------- */
     {
       id: 'v016',
-      platform: '小红书', category: '审美提升',
+      platform: '抖音', category: '审美提升',
       title: '普通人变高级的 5 个配色心法',
       hook: '穿得贵不如配得对，配色决定第一眼。',
       fullText: '同色系深浅叠穿、60%主色+30%辅色+10%点缀、避开高饱和撞色、用中性色压阵、金属色只点一处。审美是可以练出来的，从今天衣橱开始。',
       likes: '44.6万', saves: '38.9万',
       whyFire: '方法论可收藏+前后对比',
       reference: '5个心法做成系列可延展',
-      searchKw: '普通人 高级感 配色公式',
+      videoUrl: 'https://www.douyin.com/video/7665469769209957673',
       timeline: [
         { t: '0-3s', k: '钩子', d: '丑穿搭vs美穿搭分屏' },
         { t: '3-9s', k: '痛点', d: '土/乱' },
@@ -1623,14 +1622,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v018',
-      platform: '小红书', category: '审美提升',
+      platform: '抖音', category: '审美提升',
       title: '氛围感伪素颜，男生都夸干净',
       hook: '用力过猛不如清透，伪素颜才是天花板。',
       fullText: '隔离+眉粉+睫毛打底+润唇，5 分钟出门。重点在眉毛干净和唇色元气。少即是多的审美，从底妆开始。',
       likes: '29.7万', saves: '25.1万',
       whyFire: '快速出门+男性认可视角',
       reference: '5分钟公式适合通勤场景',
-      searchKw: '伪素颜 妆容 教程',
+      videoUrl: 'https://www.douyin.com/video/7629373863863871857',
       timeline: [
         { t: '0-3s', k: '钩子', d: '浓妆vs伪素颜' },
         { t: '3-9s', k: '痛点', d: '假面/厚重' },
@@ -1669,14 +1668,14 @@ input, textarea, select { font-family: inherit; }
     },
     {
       id: 'v020',
-      platform: '小红书', category: '审美提升',
+      platform: '抖音', category: '审美提升',
       title: '小户型氛围感，灯光比家具重要',
       hook: '租的房子也能住成杂志，关键在光。',
       fullText: '3000K 暖光主灯+落地灯补光+烛台点缀，关掉顶灯瞬间高级。绿植和留白是氛围放大器。家是审美的延伸。',
       likes: '19.8万', saves: '17.6万',
       whyFire: '低成本改造+出租屋场景',
       reference: '三层灯光法可复制到家',
-      searchKw: '小户型 氛围感 灯光 3000K',
+      videoUrl: 'https://www.douyin.com/video/7469836153353506099',
       timeline: [
         { t: '0-3s', k: '钩子', d: '冷白顶灯vs暖光对比' },
         { t: '3-9s', k: '痛点', d: '出租屋廉价' },
@@ -1714,13 +1713,6 @@ input, textarea, select { font-family: inherit; }
       template: '【时长】35s｜【画面】丑字→结构→被要签名｜【文案】"练对结构7天见形"｜【BGM】古琴',
     },
   ];
-
-  // 小红书类用检索词拼成 search_result 链接（小红书禁止外链直跳，搜索词可稳定抵达原笔记/视频）
-  POOL.forEach((p) => {
-    if (p.searchKw && !p.videoUrl) {
-      p.videoUrl = 'https://www.xiaohongshu.com/search_result?keyword=' + encodeURIComponent(p.searchKw);
-    }
-  });
 
   function shuffle(arr) {
     const a = arr.slice();
