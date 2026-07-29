@@ -1,5 +1,5 @@
 /* 嘎的工作台 · Service Worker：缓存应用壳，支持离线打开 */
-const CACHE = 'gw-cache-v6';
+const CACHE = 'gw-cache-v7';
 const PRECACHE = [
   './',
   'index.html',

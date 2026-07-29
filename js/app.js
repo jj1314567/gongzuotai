@@ -430,7 +430,7 @@
         <span class="chip">🔥 今日 ${S.DB.viral.items.length} 条</span>
         <span class="chip">⭐ 收藏 ${favCount}</span>
         <button class="btn ghost sm ${ui.viralFavOnly ? 'on' : ''}" data-action="viral-favonly">${ui.viralFavOnly ? '✓ 只看收藏' : '⭐ 只看收藏'}</button>
-        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
+        <span class="muted">覆盖：穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
       </div>
       ${ui.viralFavOnly && ui.viralItems.length === 0
         ? `<div class="empty">还没有收藏任何灵感 🤔 点卡片左侧「☆ 收藏」即可在这里集中查看 ✨</div>`
@@ -988,7 +988,7 @@
       case 'fr-complete': { S.completeFrenchToday(ui.frenchDate); toast('今日全部完成 🎉'); refreshTop(); renderFrench(); break; }
       case 'fr-tts': speakFr(t.dataset.text); break;
       case 'fr-newquiz': { const r = S.getFrench(ui.frenchDate) || {}; r.quiz = French.genQuiz(S.DB.french.level, 4); S.recordFrench(ui.frenchDate, r); renderFrench(); break; }
-      case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o); break;
+      case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o, t); break;
       case 'fr-add-video': frAddVideoModal(t.dataset.topic); break;
       // 日历
       case 'cal-prev': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() - 1, 1); renderCalendar(); break;
@@ -1164,13 +1164,11 @@
     S.DB.french.videos.push({ topic, url });
     S.save();
   }
-  function frQuizAnswer(qi, oi) {
+  function frQuizAnswer(qi, oi, t) {
     const quiz = S.getFrench(ui.frenchDate).quiz;
     const q = quiz[parseInt(qi, 10)];
-    const opts = $$('.quiz-opt', $('#modalBody'));
-    // 找到该 quiz 块内选项
-    const blocks = $$('.quiz', $('#modalBody'));
-    const block = blocks[parseInt(qi, 10)];
+    // 仅定位当前题的 .quiz 块（点击元素向上查找，避免误伤其它题）
+    const block = (t && t.closest) ? t.closest('.quiz') : $$('.quiz', $('#content'))[parseInt(qi, 10)];
     const bOpts = $$('.quiz-opt', block);
     bOpts.forEach((b) => (b.disabled = true));
     const correct = q.a === parseInt(oi, 10);

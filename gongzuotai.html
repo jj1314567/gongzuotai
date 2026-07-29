@@ -1224,192 +1224,6 @@ input, textarea, select { font-family: inherit; }
   // timeline(逐秒标注) / visuals(画面) / audio(音频) / logic(爆火逻辑) / template(可仿写脚本)
   // 全部为抖音内容：videoUrl 均为真实视频直链(douyin.com/video/ID 或 douyin.com/shipin/ID)
   const POOL = [
-    /* ---------------- 养生类 ---------------- */
-    {
-      id: 'v001',
-      platform: '抖音', category: '养生',
-      title: '拍八虚 21 天，我的淤堵脸终于通透了',
-      hook: '你每天累得像被抽干，可能不是缺觉，是「堵」了。',
-      fullText: '以前我以为疲劳就是没睡够，后来才知道气血淤堵才是元凶。坚持拍八虚 21 天：肘窝、腋窝、腹股沟、腘窝，每个 30 下。第一周只想放弃，第二周睡觉变沉，第三周素颜都被夸气色好。养生不是玄学，是每天 5 分钟对自己好一点。',
-      likes: '31.8万', saves: '20.1万',
-      whyFire: '自带冲突、吐槽极易爆',
-      reference: '叠加女性成长观点口播，双赛道',
-      videoUrl: 'https://www.douyin.com/video/7580180306948622693',
-      timeline: [
-        { t: '0-3s', k: '钩子', d: '对准镜子素颜特写，抛出"累不是缺觉是堵了"' },
-        { t: '3-8s', k: '痛点', d: '列举疲惫/暗沉/失眠等真实困扰' },
-        { t: '8-18s', k: '干货', d: '演示八虚位置+手法+次数' },
-        { t: '18-25s', k: '反转', d: '素颜对比，承认前两周想放弃' },
-        { t: '25-30s', k: '高潮', d: '第三周被夸气色，情绪上扬' },
-        { t: '30-35s', k: '结尾', d: '引导收藏跟练，@自己的打卡' },
-      ],
-      visuals: '镜头：正面半身→局部特写；景别：近景+特写切换；运镜：手持稳定，轻微推近；字幕：痛点用红字，手法用白字描边。',
-      audio: 'BGM：轻钢琴《River Flows in You》变速版；卡点：反转处音乐渐强；音效：拍击"啪"声放大。',
-      logic: '用户痛点=亚健康疲劳；情绪共鸣=被夸气色的爽感；传播点=可复制的 5 分钟动作+21天仪式感。',
-      template: '【时长】35s｜【画面】素颜特写→八虚演示→对比｜【文案】"累不是缺觉是堵了，拍八虚21天…"｜【BGM】轻钢琴',
-    },
-    {
-      id: 'v002',
-      platform: '抖音', category: '养生',
-      title: '八段锦第 3 式做错=白练，90% 人都踩坑',
-      hook: '你练了半年八段锦，可能一直在对着空气发力。',
-      fullText: '第三式"调理脾胃须单举"，很多人都做成甩手。正确做法：一手向上擎天一手向下按地，两臂对拉，脊柱拔长。每天 3 组×8 次，饭后一小时练。我 archives 了跟练合集，收藏不迷路。养生最怕假努力，动作对了才有用。',
-      likes: '21.7万', saves: '5.5万',
-      whyFire: '反常识钩子+身份认同',
-      reference: '前置结果：先讲逆袭成果再倒推',
-      videoUrl: 'https://www.douyin.com/video/7666969033376308937',
-      timeline: [
-        { t: '0-2s', k: '钩子', d: '快剪错误动作+大字"做错=白练"' },
-        { t: '2-6s', k: '痛点', d: '自嘲练半年没效果' },
-        { t: '6-16s', k: '干货', d: '慢动作拆解正确发力' },
-        { t: '16-22s', k: '反转', d: '对比错误vs正确体态' },
-        { t: '22-28s', k: '高潮', d: '跟练合集露出，引导关注' },
-        { t: '28-30s', k: '结尾', d: '口号"动作对了才有用"' },
-      ],
-      visuals: '镜头：侧面全身+局部；景别：中景为主；运镜：慢动作定格错误的瞬间；字幕：关键发力点高亮。',
-      audio: 'BGM：古风电子《清平调》remix；卡点：定格瞬间鼓点；音效：吸气"嘶"声。',
-      logic: '用户痛点=无效练习；情绪共鸣=怕白努力的焦虑；传播点=纠错型权威感+合集留存。',
-      template: '【时长】30s｜【画面】错误快剪→慢动作拆解→合集｜【文案】"做错=白练，90%踩坑"｜【BGM】古风电子',
-    },
-    {
-      id: 'v003',
-      platform: '抖音', category: '养生',
-      title: '睡前仙人揉腹，肠道菌群都安静了',
-      hook: '熬夜党便秘气色差？你缺的不是面膜是揉腹。',
-      fullText: '每天睡前顺时针揉腹 100 下，掌心焐热再上手。刚开始咕噜咕噜响别怕，那是肠子在动。坚持一个月，排便规律了，小肚子也平了。中医说的"腹为五脏六腑之宫城"真不是唬人。',
-      likes: '55.7万', saves: '28.7万',
-      whyFire: '痛点精准、高收藏',
-      reference: '结合你从内耗到搞钱的亲身转变讲',
-      videoUrl: 'https://www.douyin.com/video/7481513747698289977',
-      timeline: [
-        { t: '0-3s', k: '钩子', d: '躺姿暖光特写+反问' },
-        { t: '3-10s', k: '痛点', d: '便秘/小肚子/气色' },
-        { t: '10-20s', k: '干货', d: '手法演示+次数+方向' },
-        { t: '20-26s', k: '反转', d: '肠鸣音效自黑搞笑' },
-        { t: '26-32s', k: '高潮', d: '一个月对比' },
-        { t: '32-36s', k: '结尾', d: '晚安打卡引导' },
-      ],
-      visuals: '镜头：俯拍手部+腹部；景别：特写；运镜：固定机位暖光；字幕：步骤序号化。',
-      audio: 'BGM：白噪音+轻音乐；卡点：肠鸣音效；音效：掌心摩擦声。',
-      logic: '用户痛点=便秘身材焦虑；情绪共鸣=对"简单有效"的渴望；传播点=反常识（不是面膜是揉腹）。',
-      template: '【时长】36s｜【画面】暖光躺姿→手法→对比｜【文案】"缺的不是面膜是揉腹"｜【BGM】轻音乐',
-    },
-    {
-      id: 'v004',
-      platform: '抖音', category: '养生',
-      title: '体态自救：含胸驼背 7 天打开肩胛',
-      hook: '穿再多好看衣服，含胸也显廉价。',
-      fullText: '每天 5 分钟开肩：靠墙天使、弹力带外旋、猫牛式。我含胸十年，练了一周同事说我"站直了好看一倍"。体态是最便宜的高级感，别等年纪大了才后悔。',
-      likes: '18.3万', saves: '9.6万',
-      whyFire: '前后对比强、视觉冲击',
-      reference: '用"最便宜的医美"做价值锚点',
-      videoUrl: 'https://www.douyin.com/video/7666854014260310976',
-      timeline: [
-        { t: '0-2s', k: '钩子', d: '侧身对比"含胸vs挺拔"' },
-        { t: '2-8s', k: '痛点', d: '显廉价/没气质' },
-        { t: '8-20s', k: '干货', d: '三个开肩动作演示' },
-        { t: '20-26s', k: '反转', d: '同事评价反转' },
-        { t: '26-32s', k: '高潮', d: '一周变化' },
-        { t: '32-35s', k: '结尾', d: '收藏跟练' },
-      ],
-      visuals: '镜头：正侧面对比；景别：全身；运镜：分屏对比；字幕：动作名+组数。',
-      audio: 'BGM：节奏感流行；卡点：每个动作切鼓点；音效：弹力带"嘣"。',
-      logic: '用户痛点=体态焦虑；情绪共鸣=被评价"挺拔好看"；传播点=低门槛+高回报叙事。',
-      template: '【时长】35s｜【画面】分屏对比→动作演示→变化｜【文案】"含胸显廉价"｜【BGM】流行',
-    },
-    {
-      id: 'v005',
-      platform: '抖音', category: '养生',
-      title: '阴虚火旺熬夜脸，一碗汤喝回水润',
-      hook: '凌晨两点还在刷手机？你的脸在报警。',
-      fullText: '银耳百合莲子羹：银耳半朵泡发、百合 10g、莲子 15g、冰糖少许，小火炖 40 分钟出胶。每周 3 次，喝两周嘴角不起皮了，上妆不卡粉。内调外养，比敷十张面膜实在。',
-      likes: '42.1万', saves: '33.4万',
-      whyFire: '精准场景+高收藏方子',
-      reference: '把"内调外养"做成系列选题',
-      videoUrl: 'https://www.douyin.com/video/7585772346004737337',
-      timeline: [
-        { t: '0-3s', k: '钩子', d: '深夜手机光+干皮特写' },
-        { t: '3-9s', k: '痛点', d: '起皮/卡粉/火旺' },
-        { t: '9-22s', k: '干货', d: '食材称重+炖煮过程' },
-        { t: '22-28s', k: '反转', d: '喝汤满足表情' },
-        { t: '28-34s', k: '高潮', d: '两周水润对比' },
-        { t: '34-38s', k: '结尾', d: '收藏方子' },
-      ],
-      visuals: '镜头：食材平铺+锅具特写；景别：微距；运镜：慢推；字幕：克数标注。',
-      audio: 'BGM：治愈系吉他；卡点：出胶冒泡；音效：勺搅"咕嘟"。',
-      logic: '用户痛点=熬夜损伤；情绪共鸣=内调实在感；传播点=精确克数可复制。',
-      template: '【时长】38s｜【画面】干皮→炖煮→水润｜【文案】"脸在报警"｜【BGM】治愈吉他',
-    },
-    {
-      id: 'v006',
-      platform: '抖音', category: '养生',
-      title: '泡脚加它，睡得比娃还沉',
-      hook: '失眠别再数羊，你缺的是一盆对的泡脚水。',
-      fullText: '艾叶 15g+生姜 3 片+花椒 10 粒，煮水兑温 40 度泡 20 分钟，微微出汗就停。我三十年浅眠，现在沾枕就着。睡前一小时泡，别出大汗伤津。',
-      likes: '36.5万', saves: '15.2万',
-      whyFire: '民间验方+强结果承诺',
-      reference: '用"三十年浅眠"建立信任背书',
-      videoUrl: 'https://www.douyin.com/video/7597828671861260751',
-      timeline: [
-        { t: '0-2s', k: '钩子', d: '闹钟特写+黑眼圈' },
-        { t: '2-7s', k: '痛点', d: '浅眠/黑眼圈' },
-        { t: '7-18s', k: '干货', d: '配方+水温+时长' },
-        { t: '18-24s', k: '反转', d: '鼾睡音效搞笑' },
-        { t: '24-30s', k: '高潮', d: '神清气爽晨间' },
-        { t: '30-33s', k: '结尾', d: '方子收藏' },
-      ],
-      visuals: '镜头：脚部入水+蒸汽；景别：特写；运镜：升腾蒸汽慢镜；字幕：配方浮窗。',
-      audio: 'BGM：舒缓白噪音；卡点：鼾声反转；音效：水声。',
-      logic: '用户痛点=失眠；情绪共鸣=久违的好眠；传播点=民间验方信任感。',
-      template: '【时长】33s｜【画面】黑眼圈→泡脚→晨间｜【文案】"缺的是对的泡脚水"｜【BGM】白噪音',
-    },
-    {
-      id: 'v007',
-      platform: '抖音', category: '养生',
-      title: '脾虚人自救：把奶茶换成它',
-      hook: '天天奶茶脸肿虚胖？换一杯，两周小一圈。',
-      fullText: '炒薏米 20g+茯苓 15g+陈皮 5g，煮水当茶喝。去湿气不寒凉，经期也能喝。我戒奶茶换它，下颌线都出来了。甜的不是罪，选错才受罪。',
-      likes: '28.9万', saves: '22.7万',
-      whyFire: '对标奶茶、低门槛替代',
-      reference: '戒瘾+变美双线叙事',
-      videoUrl: 'https://www.douyin.com/video/6708678931395988749',
-      timeline: [
-        { t: '0-3s', k: '钩子', d: '奶茶vs茶水分屏' },
-        { t: '3-9s', k: '痛点', d: '虚胖/脸肿' },
-        { t: '9-20s', k: '干货', d: '配方+煮法+适宜人群' },
-        { t: '20-26s', k: '反转', d: '下颌线特写' },
-        { t: '26-32s', k: '高潮', d: '两周对比' },
-        { t: '32-36s', k: '结尾', d: '方子收藏' },
-      ],
-      visuals: '镜头：饮品平拍；景别：近景；运镜：45度俯拍；字幕：配方卡。',
-      audio: 'BGM：清新尤克里里；卡点：倒水；音效：冰块。',
-      logic: '用户痛点=水肿虚胖；情绪共鸣=戒瘾替代方案；传播点=对标奶茶的低门槛。',
-      template: '【时长】36s｜【画面】奶茶vs茶饮→配方→对比｜【文案】"换一杯小一圈"｜【BGM】尤克里里',
-    },
-    {
-      id: 'v008',
-      platform: '抖音', category: '养生',
-      title: '女生必学：经期暖宫揉这里',
-      hook: '痛经蜷成虾？别只会喝热水。',
-      fullText: '经前一周每天按揉三阴交、关元穴各 3 分钟，配合热水袋。我从吃布洛芬到能正常上班。穴位养生是老祖宗的礼物，早用早轻松。',
-      likes: '24.6万', saves: '18.9万',
-      whyFire: '强痛点+实用自救',
-      reference: '把"老祖宗礼物"做成记忆点',
-      videoUrl: 'https://www.douyin.com/video/7666720048014183718',
-      timeline: [
-        { t: '0-2s', k: '钩子', d: '蜷缩特写+痛点表情' },
-        { t: '2-7s', k: '痛点', d: '痛经影响生活' },
-        { t: '7-18s', k: '干货', d: '穴位定位+按揉法' },
-        { t: '18-24s', k: '反转', d: '轻松办公反转' },
-        { t: '24-30s', k: '高潮', d: '告别布洛芬' },
-        { t: '30-33s', k: '结尾', d: '收藏自用' },
-      ],
-      visuals: '镜头：腿部/腹部标注；景别：特写；运镜：手指指引；字幕：穴位名。',
-      audio: 'BGM：温柔钢琴；卡点：按揉节奏；音效：轻叹气放松。',
-      logic: '用户痛点=痛经；情绪共鸣=摆脱药物依赖；传播点=实用自救技能。',
-      template: '【时长】33s｜【画面】蜷缩→穴位→轻松｜【文案】"别只喝热水"｜【BGM】钢琴',
-    },
-
     /* ---------------- 穿搭带货类 ---------------- */
     {
       id: 'v009',
@@ -1723,13 +1537,13 @@ input, textarea, select { font-family: inherit; }
     return a;
   }
 
-  // 生成 10 条：保证三类均衡（每类尽量 3-4 条）
+  // 生成 10 条：保证各分类均衡（按当前 POOL 实际分类动态轮转）
   function generate(force) {
     const today = Store.todayStr();
     if (!force && Store.DB.viral.date === today && Store.DB.viral.items.length) {
       return Store.DB.viral.items;
     }
-    const cats = ['养生', '穿搭带货', '审美提升'];
+    const cats = Array.from(new Set(POOL.map((p) => p.category)));
     const byCat = {};
     cats.forEach((c) => (byCat[c] = shuffle(POOL.filter((p) => p.category === c))));
     const picked = [];
@@ -2832,7 +2646,7 @@ input, textarea, select { font-family: inherit; }
         <span class="chip">🔥 今日 ${S.DB.viral.items.length} 条</span>
         <span class="chip">⭐ 收藏 ${favCount}</span>
         <button class="btn ghost sm ${ui.viralFavOnly ? 'on' : ''}" data-action="viral-favonly">${ui.viralFavOnly ? '✓ 只看收藏' : '⭐ 只看收藏'}</button>
-        <span class="muted">覆盖：养生 / 穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
+        <span class="muted">覆盖：穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
       </div>
       ${ui.viralFavOnly && ui.viralItems.length === 0
         ? `<div class="empty">还没有收藏任何灵感 🤔 点卡片左侧「☆ 收藏」即可在这里集中查看 ✨</div>`
@@ -3390,7 +3204,7 @@ input, textarea, select { font-family: inherit; }
       case 'fr-complete': { S.completeFrenchToday(ui.frenchDate); toast('今日全部完成 🎉'); refreshTop(); renderFrench(); break; }
       case 'fr-tts': speakFr(t.dataset.text); break;
       case 'fr-newquiz': { const r = S.getFrench(ui.frenchDate) || {}; r.quiz = French.genQuiz(S.DB.french.level, 4); S.recordFrench(ui.frenchDate, r); renderFrench(); break; }
-      case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o); break;
+      case 'fr-quiz': frQuizAnswer(t.dataset.q, t.dataset.o, t); break;
       case 'fr-add-video': frAddVideoModal(t.dataset.topic); break;
       // 日历
       case 'cal-prev': ui.calMonth = new Date(ui.calMonth.getFullYear(), ui.calMonth.getMonth() - 1, 1); renderCalendar(); break;
@@ -3566,13 +3380,11 @@ input, textarea, select { font-family: inherit; }
     S.DB.french.videos.push({ topic, url });
     S.save();
   }
-  function frQuizAnswer(qi, oi) {
+  function frQuizAnswer(qi, oi, t) {
     const quiz = S.getFrench(ui.frenchDate).quiz;
     const q = quiz[parseInt(qi, 10)];
-    const opts = $$('.quiz-opt', $('#modalBody'));
-    // 找到该 quiz 块内选项
-    const blocks = $$('.quiz', $('#modalBody'));
-    const block = blocks[parseInt(qi, 10)];
+    // 仅定位当前题的 .quiz 块（点击元素向上查找，避免误伤其它题）
+    const block = (t && t.closest) ? t.closest('.quiz') : $$('.quiz', $('#content'))[parseInt(qi, 10)];
     const bOpts = $$('.quiz-opt', block);
     bOpts.forEach((b) => (b.disabled = true));
     const correct = q.a === parseInt(oi, 10);
