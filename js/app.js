@@ -55,7 +55,7 @@
   }
 
   /* ---------------- 路由 ---------------- */
-  const VALID_VIEWS = ['overview', 'health', 'posture', 'recipe', 'diary', 'viral', 'french', 'tea', 'calendar', 'settings'];
+  const VALID_VIEWS = ['overview', 'health', 'posture', 'recipe', 'diary', 'viral', 'french', 'tea', 'evening', 'calendar', 'settings'];
   function switchView(v) {
     if (!VALID_VIEWS.includes(v)) v = 'overview';
     ui.view = v;
@@ -64,7 +64,7 @@
     const map = {
       overview: renderOverview, health: renderHealth, posture: renderPosture,
       recipe: renderRecipe, diary: renderDiary, viral: renderViral,
-      french: renderFrench, tea: renderTea, calendar: renderCalendar, settings: renderSettings,
+      french: renderFrench, tea: renderTea, evening: renderEvening, calendar: renderCalendar, settings: renderSettings,
     };
     (map[v] || renderOverview)();
   }
@@ -99,6 +99,7 @@
             ${quickLink('diary', '📝', '我的日记', '碎碎念自动归纳')}
             ${quickLink('viral', '🔥', '爆款灵感', '每日 10 条可刷新')}
             ${quickLink('french', '🥐', '法语学习', '听说读 + 随堂测')}
+            ${quickLink('evening', '🌙', '晚间调度', '下班后优先级')}
           </div>
         </div>
         <div class="card">
@@ -775,6 +776,80 @@
   }
 
   /* ============================================================
+     晚间任务优先级调度助手
+     ============================================================ */
+  function renderEvening() {
+    const ev = S.DB.evening;
+    const energy = ev.energy || 'normal';
+    const tasks = ev.tasks || [];
+    const top = Evening.computeTop(tasks, energy);
+    const pendingCount = tasks.filter((t) => t.status !== 'done').length;
+
+    const scoreOf = (t) => (t._score != null ? t._score
+      : +((Evening.WEIGHTS[t.cat] || 4) / Math.max(1, Number(t.mins) || 1) * Evening.ENERGY[energy]).toFixed(2));
+    const hero = top
+      ? `<div class="eve-hero">
+           <div class="eve-hero-label">🌙 现在最该做</div>
+           <div class="eve-top-name">${esc(top.name)}</div>
+           <div class="eve-top-meta">
+             <span class="eve-badge ${top.cat.toLowerCase()}">${Evening.CAT_NAME[top.cat]}</span>
+             <span class="eve-muted">权重 ${Evening.WEIGHTS[top.cat]} · 约 ${top.mins} 分钟 · 得分 ${scoreOf(top)}</span>
+           </div>
+           <div class="eve-hint">💡 ${esc(Evening.hintFor(top, energy))}</div>
+           <button class="btn eve-done-btn" data-action="eve-done" data-id="${esc(top.id)}">✓ 这件做完了</button>
+         </div>`
+      : `<div class="eve-hero empty-hero">
+           <div class="eve-hero-label">🌙 晚间调度</div>
+           <div class="eve-top-name" style="font-size:20px">今晚没有待办啦</div>
+           <div class="eve-hint">🛋️ 全部清空或本来就没安排，安心休息 ✿</div>
+         </div>`;
+
+    const energyPills = ['high', 'normal', 'low'].map((lv) =>
+      `<span class="tab ${energy === lv ? 'active' : ''}" data-action="eve-energy" data-level="${lv}">${Evening.ENERGY_LABEL[lv]}</span>`).join('');
+
+    const taskRows = tasks.length ? tasks.map((t) => `
+      <div class="eve-task ${t.status === 'done' ? 'done' : ''}">
+        <button class="eve-badge ${t.cat.toLowerCase()} eve-cat-btn" data-action="eve-cat" data-id="${esc(t.id)}" title="点按切换 S/A/B">${t.cat}</button>
+        <span class="eve-task-name">${esc(t.name)}</span>
+        <span class="eve-task-mins">${t.mins}分</span>
+        <button class="check sm ${t.status === 'done' ? 'on' : ''}" data-action="eve-toggle" data-id="${esc(t.id)}" title="标记完成">${t.status === 'done' ? '✓' : ''}</button>
+        <button class="eve-del" data-action="eve-del" data-id="${esc(t.id)}" title="删除">✕</button>
+      </div>`).join('')
+      : '<div class="muted" style="padding:6px 0">还没有任务，下面粘贴或添加 👇</div>';
+
+    const html = `
+      <div class="view-head">
+        <div><div class="view-title">🌙 晚间调度</div><div class="view-desc">下班后的事，按长期优先级排好队</div></div>
+      </div>
+      ${hero}
+      <div class="card">
+        <div class="sec-title">⚡ 当前状态</div>
+        <div class="fr-level" style="margin-bottom:4px">${energyPills}</div>
+        <p class="muted">系数：精力充沛 ×1 ｜ 普通疲惫 ×0.8 ｜ 极度疲累 ×0.5。得分 = 权重 ÷ 耗时 × 系数，越高越先做。</p>
+      </div>
+      <div class="card">
+        <div class="sec-title">📥 批量导入</div>
+        <p class="muted">粘贴多行，格式：<b>任务名 + 耗时 + 状态</b>。例：<br><code>读书 30 未完成</code> ／ <code>洗碗 15 已完成</code></p>
+        <textarea class="textarea" id="eveImport" rows="4" placeholder="读书 30 未完成&#10;副业切片剪辑 60 未完成&#10;洗碗 15 已完成"></textarea>
+        <button class="btn sm" data-action="eve-import">⬆ 解析并导入</button>
+      </div>
+      <div class="card">
+        <div class="sec-title">➕ 手动添加</div>
+        <div class="eve-add">
+          <input class="input" id="eveName" placeholder="任务名，如：晚间体态训练" />
+          <input class="input eve-mins" id="eveMins" type="number" min="1" placeholder="分钟" />
+          <button class="btn sm" data-action="eve-add">添加</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="sec-title">📋 待办清单 <span class="eve-muted">（${pendingCount} 项待做）</span></div>
+        <div class="eve-list">${taskRows}</div>
+        ${tasks.length ? `<button class="btn ghost sm" data-action="eve-clear" style="margin-top:8px">🧹 清空今晚</button>` : ''}
+      </div>`;
+    mount(html);
+  }
+
+  /* ============================================================
      日历
      ============================================================ */
   function renderCalendar() {
@@ -977,6 +1052,43 @@
       case 'tea-day': teaPickModal(t.dataset.date); break;
       case 'tea-assign': { S.setTeaDay(t.dataset.date, t.dataset.id); closeModal(); renderTea(); toast('已安排'); break; }
       case 'tea-clear-day': { S.clearTeaDay(t.dataset.date); closeModal(); renderTea(); break; }
+
+      /* ---- 晚间任务优先级调度 ---- */
+      case 'eve-energy': { S.setEveningEnergy(t.dataset.level); renderEvening(); break; }
+      case 'eve-import': {
+        const txt = ($('#eveImport') || {}).value || '';
+        const list = Evening.parseImport(txt);
+        let added = 0, skipped = 0;
+        list.forEach((it) => {
+          if (Evening.isOutOfScope(it.name)) { skipped++; return; }
+          S.addEveningTask(it.name, it.mins, it.status); added++;
+        });
+        if (skipped) toast('晨练/工作类不纳入，已忽略 ' + skipped + ' 条');
+        else if (added) toast('已导入 ' + added + ' 条');
+        else toast('没解析到任务，检查格式');
+        renderEvening();
+        break;
+      }
+      case 'eve-add': {
+        const name = ($('#eveName') || {}).value || '';
+        const mins = ($('#eveMins') || {}).value || '';
+        if (!name.trim()) { toast('先填任务名'); break; }
+        if (Evening.isOutOfScope(name)) { toast('晨练/工作类不纳入晚间排序'); break; }
+        S.addEveningTask(name.trim(), mins, 'todo');
+        toast('已添加');
+        renderEvening();
+        break;
+      }
+      case 'eve-toggle': { S.toggleEveningTask(id); renderEvening(); break; }
+      case 'eve-done': { S.toggleEveningTask(id); toast('这件搞定 ✓'); renderEvening(); break; }
+      case 'eve-cat': {
+        const order = ['S', 'A', 'B'];
+        const cur = S.DB.evening.tasks.find((x) => x.id === id);
+        if (cur) { const nx = order[(order.indexOf(cur.cat) + 1) % order.length]; S.setEveningCat(id, nx); renderEvening(); }
+        break;
+      }
+      case 'eve-del': { S.removeEveningTask(id); renderEvening(); break; }
+      case 'eve-clear': { if (confirm('清空今晚所有任务？')) { S.clearEvening(); renderEvening(); } break; }
       // 法语
       case 'fr-level': S.setFrenchLevel(t.dataset.key); ui.frenchDate = S.todayStr(); renderFrench(); toast('已切到 ' + t.dataset.key); break;
       case 'fr-skill-item': {

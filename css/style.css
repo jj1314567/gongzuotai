@@ -765,3 +765,44 @@ input, textarea, select { font-family: inherit; }
 .fr-video-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(251,114,153,.4); }
 .fr-video-btn::before { content: '📺'; }
 .jump-btn.sm { padding: 6px 11px; font-size: 12.5px; }
+
+/* ============================================================
+   晚间任务优先级调度助手
+   ============================================================ */
+.eve-hero {
+  background: linear-gradient(135deg, var(--primary-soft), #fff 120%);
+  border: 1px solid var(--border); border-radius: 18px; padding: 18px 16px; margin-bottom: 16px;
+  box-shadow: 0 6px 20px rgba(139,92,246,.10);
+}
+.eve-hero.empty-hero { background: var(--card-solid); box-shadow: none; }
+.eve-hero-label { font-size: 12.5px; color: var(--text-soft); letter-spacing: .04em; }
+.eve-top-name { font-size: 26px; font-weight: 800; color: var(--text); margin: 6px 0 10px; line-height: 1.25; }
+.eve-top-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.eve-muted { font-size: 12px; color: var(--text-soft); }
+.eve-hint {
+  background: #fff; border-left: 4px solid var(--primary); border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; color: var(--text); line-height: 1.5; margin-bottom: 12px;
+}
+.eve-done-btn { width: 100%; justify-content: center; }
+.eve-badge {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px;
+  padding: 0 7px; border-radius: 999px; font-size: 11.5px; font-weight: 800; color: #fff; border: none; cursor: pointer;
+}
+.eve-badge.s { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.eve-badge.a { background: linear-gradient(135deg, #10b981, #047857); }
+.eve-badge.b { background: #9aa0ad; }
+.eve-list { display: flex; flex-direction: column; gap: 8px; }
+.eve-task {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px; background: var(--card-solid);
+  border: 1px solid var(--border); border-radius: 12px;
+}
+.eve-task.done { opacity: .5; }
+.eve-task.done .eve-task-name { text-decoration: line-through; }
+.eve-task-name { flex: 1; font-size: 14px; color: var(--text); }
+.eve-task-mins { font-size: 12px; color: var(--text-soft); white-space: nowrap; }
+.eve-cat-btn { cursor: pointer; }
+.eve-del { border: none; background: transparent; color: var(--text-soft); font-size: 15px; cursor: pointer; padding: 2px 4px; }
+.eve-del:hover { color: #ef4444; }
+.eve-add { display: flex; gap: 8px; flex-wrap: wrap; }
+.eve-add .input { flex: 1; min-width: 120px; }
+.eve-add .eve-mins { flex: 0 0 76px; min-width: 76px; }

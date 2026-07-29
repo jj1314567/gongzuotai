@@ -47,6 +47,7 @@
       viral: { date: '', items: [] },
       viralFavs: [], // 爆款灵感收藏（独立存放，避免被每日 generate 覆盖）
       tea: { favorites: [], week: { start: '', plan: {} } }, // 茶饮管家：收藏id / 周计划
+      evening: { energy: 'normal', tasks: [] }, // 晚间任务优先级调度
       settings: { theme: 'purple', name: '小主' },
     };
   }
@@ -290,6 +291,27 @@
   }
   function getViralFavs() { return DB.viralFavs.slice(); }
 
+  /* ---------- 晚间任务优先级调度 ---------- */
+  function getEvening() { return DB.evening; }
+  function addEveningTask(name, mins, status) {
+    const cat = (global.Evening && global.Evening.detectCategory) ? global.Evening.detectCategory(name) : 'B';
+    DB.evening.tasks.push({ id: uid(), name: name, mins: Math.max(1, Number(mins) || 15), status: status || 'todo', cat: cat });
+    save();
+  }
+  function toggleEveningTask(id) {
+    const t = DB.evening.tasks.find((x) => x.id === id);
+    if (t) t.status = t.status === 'done' ? 'todo' : 'done';
+    save();
+  }
+  function setEveningCat(id, cat) {
+    const t = DB.evening.tasks.find((x) => x.id === id);
+    if (t) t.cat = cat;
+    save();
+  }
+  function setEveningEnergy(level) { DB.evening.energy = level; save(); }
+  function removeEveningTask(id) { DB.evening.tasks = DB.evening.tasks.filter((x) => x.id !== id); save(); }
+  function clearEvening() { DB.evening.tasks = []; save(); }
+
   /* ---------- 茶饮管家 ---------- */
   function isTeaFav(id) { return DB.tea.favorites.includes(id); }
   function toggleTeaFav(id) {
@@ -344,6 +366,7 @@
     setTheme, applyTheme,
     isViralFav, toggleViralFav, getViralFavs,
     isTeaFav, toggleTeaFav, setTeaDay, clearTeaDay, getTeaPlan,
+    getEvening, addEveningTask, toggleEveningTask, setEveningCat, setEveningEnergy, removeEveningTask, clearEvening,
     todaySummary, exportData, importData,
   };
 })(window);
