@@ -10,6 +10,29 @@
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  // 从用户输入（可能是整段分享文案）里提取并规范化一个可点击的链接。
+  // 两种常见坑：① 抖音/小红书分享文本常缺协议头(如 v.douyin.com/xxx、xhslink.com/xxx)，
+  //   缺头会被浏览器当成相对路径打不开；② 整段粘贴带标题文字，href 成一坨也无法跳转。
+  function extractUrl(text) {
+    if (!text) return '';
+    const s = String(text).trim();
+    if (!s) return '';
+    // 1) 优先取完整 http(s) 链接
+    let m = s.match(/https?:\/\/[^\s"'<>【】]+/i);
+    let raw = m ? m[0] : null;
+    // 2) 退而取裸域名/短链：v.douyin.com/... www.xiaohongshu.com/... xhslink.com/...
+    if (!raw) {
+      m = s.match(/(?:[a-z0-9-]+\.)+(?:com|cn|net|org|tv|me|io|cc|co|app)\b[^\s"'<>【】]*/i);
+      raw = m ? m[0] : null;
+    }
+    if (!raw) return '';
+    // 去掉尾部常见标点/括号/书名号
+    raw = raw.replace(/[。，、）)】\]】]+$/, '').replace(/^[【(（]+/, '');
+    // 缺协议头则补 https://
+    if (!/^https?:\/\//i.test(raw)) raw = 'https://' + raw;
+    return raw;
+  }
+
   // 当前 UI 临时状态
   const ui = {
     view: 'overview',
@@ -431,7 +454,7 @@
         <span class="chip">🔥 今日 ${S.DB.viral.items.length} 条</span>
         <span class="chip">⭐ 收藏 ${favCount}</span>
         <button class="btn ghost sm ${ui.viralFavOnly ? 'on' : ''}" data-action="viral-favonly">${ui.viralFavOnly ? '✓ 只看收藏' : '⭐ 只看收藏'}</button>
-        <span class="muted">覆盖：穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
+        <span class="muted">覆盖：抖音 / 小红书 · 穿搭带货 / 审美提升。点左侧「☆ 收藏」留存灵感，点「看相关视频」直达原视频，点「完整拆解」看 6 步分析。</span>
       </div>
       ${ui.viralFavOnly && ui.viralItems.length === 0
         ? `<div class="empty">还没有收藏任何灵感 🤔 点卡片左侧「☆ 收藏」即可在这里集中查看 ✨</div>`
@@ -1030,7 +1053,12 @@
       case 'viral-detail': viralDetail(parseInt(t.dataset.i, 10)); break;
       case 'viral-video': {
         const url = t.dataset.url;
-        if (url) { e.preventDefault(); const w = window.open(url, '_blank'); if (!w) location.href = url; }
+        if (url) {
+          e.preventDefault();
+          const a = document.createElement('a');
+          a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+          document.body.appendChild(a); a.click(); a.remove();
+        }
         break;
       }
       case 'viral-favonly': ui.viralFavOnly = !ui.viralFavOnly; renderViral(); break;
@@ -1164,28 +1192,28 @@
     if (a === 'save-recipe') { const id = b.dataset.id; const obj = readRecipeForm(); if (id) S.updateRecipe(id, obj); else S.addRecipe(obj); closeModal(); renderRecipe(); toast('已保存'); }
     if (a === 'save-recipe-link') {
       const title = ($('#rTitle') && $('#rTitle').value.trim()) || '未命名方子';
-      const videoUrl = ($('#rVideo') && $('#rVideo').value.trim()) || '';
+      const videoUrl = extractUrl(($('#rVideo') && $('#rVideo').value.trim()) || '');
       S.addRecipe({ title, videoUrl });
       closeModal(); renderRecipe(); toast('已建骨架方子，点“编辑”补全用料与步骤');
     }
     if (a === 'save-diary') { const d = $('#diaryDate').value; S.upsertDiary(d, $('#diaryText').value); closeModal(); renderDiary(); toast('已保存'); }
     if (a === 'save-plan') { const id = b.dataset.id; const obj = readPlanForm(); if (id) S.updatePlan(id, obj); else S.addPlan(obj); closeModal(); renderCalendar(); refreshTop(); toast('已添加'); }
-    if (a === 'save-fr-video') { const topic = b.dataset.topic; const url = $('#frVideoUrl').value.trim(); frVideosPush(topic, url); closeModal(); renderFrench(); toast('已添加教学视频'); }
+    if (a === 'save-fr-video') { const topic = b.dataset.topic; const url = extractUrl($('#frVideoUrl').value.trim()); frVideosPush(topic, url); closeModal(); renderFrench(); toast('已添加教学视频'); }
     if (a === 'do-import') doImport();
   });
 
   /* ---------------- 表单读取 ---------------- */
   function readHabitForm() {
-    return { name: $('#hName').value.trim() || '新习惯', icon: $('#hIcon').value.trim() || '🌿', note: $('#hNote').value.trim(), videoUrl: $('#hVideo').value.trim() };
+    return { name: $('#hName').value.trim() || '新习惯', icon: $('#hIcon').value.trim() || '🌿', note: $('#hNote').value.trim(), videoUrl: extractUrl($('#hVideo').value.trim()) };
   }
   function readExForm() {
-    return { name: $('#exName').value.trim() || '新动作', videoUrl: $('#exVideo').value.trim() };
+    return { name: $('#exName').value.trim() || '新动作', videoUrl: extractUrl($('#exVideo').value.trim()) };
   }
   function readRecipeForm() {
     const ing = $('#rIng').value.split('\n').map((s) => s.trim()).filter(Boolean);
     const stp = $('#rStep').value.split('\n').map((s) => s.trim()).filter(Boolean);
     const tags = $('#rTags').value.split(/[,，\s]+/).map((s) => s.trim()).filter(Boolean);
-    return { title: $('#rTitle').value.trim() || '未命名方子', videoUrl: $('#rVideo').value.trim(), tags, ingredients: ing, steps: stp, tips: $('#rTips').value.trim() };
+    return { title: $('#rTitle').value.trim() || '未命名方子', videoUrl: extractUrl($('#rVideo').value.trim()), tags, ingredients: ing, steps: stp, tips: $('#rTips').value.trim() };
   }
   function readPlanForm() {
     return { date: $('#pDate').value, title: $('#pTitle').value.trim() || '计划', time: $('#pTime').value.trim() };
