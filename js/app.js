@@ -3,6 +3,7 @@
    ============================================================ */
 (function () {
   'use strict';
+  const global = window;
 
   const S = Store;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -983,8 +984,10 @@
       { k: 'blue', n: '黛蓝', g: 'linear-gradient(135deg,#60a5fa,#cffafe)' },
       { k: 'pink', n: '樱粉', g: 'linear-gradient(135deg,#f9a8d4,#fecdd3)' },
     ];
+    const cc = (global.CloudSync && global.CloudSync.getCfg) ? global.CloudSync.getCfg() : {};
+    const cloudStatusText = cc.lastSync ? ('上次同步：' + new Date(cc.lastSync).toLocaleString()) : '尚未同步';
     const html = `
-      <div class="view-head"><div><div class="view-title">设置</div><div class="view-desc">皮肤主题 · 资料 · 数据备份</div></div></div>
+      <div class="view-head"><div><div class="view-title">设置</div><div class="view-desc">皮肤主题 · 资料 · 数据备份 · 云同步</div></div></div>
       <div class="card">
         <div class="sec-title">🎨 高级皮肤（5 套 · 可随时切换）</div>
         <div class="theme-grid">
@@ -1005,6 +1008,19 @@
           <button class="btn ghost" data-action="import-data">⬆ 导入备份</button>
           <button class="btn danger" data-action="reset-data">🗑 清空数据</button>
         </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="sec-title">☁ 云同步（手机 ↔ 电脑自动同步）</div>
+        <p class="muted">用 GitHub 私密 Gist 同步，需一个 GitHub 私人访问令牌(PAT，勾选 gist 权限)；手机电脑填<b>同一个令牌</b>即自动同步。建议设加密口令，云端内容才加密（令牌与口令均仅存本机浏览器）。</p>
+        <div class="field"><label>GitHub 令牌 (PAT)</label><input type="password" class="input" id="cloudToken" placeholder="ghp_..." value="${esc(cc.token || '')}"></div>
+        <div class="field"><label>加密口令（可选，建议设置）</label><input type="password" class="input" id="cloudPwd" placeholder="设一个口令，云端内容才加密" value="${esc(cc.pwd || '')}"></div>
+        <label class="row" style="align-items:center;gap:8px;margin-top:6px;flex:none"><input type="checkbox" id="cloudEnabled" ${cc.enabled ? 'checked' : ''}><span>启用自动同步（每次改动自动备份到云端）</span></label>
+        <div class="row" style="flex:none;margin-top:8px">
+          <button class="btn" data-action="cloud-save">💾 保存配置</button>
+          <button class="btn ghost" data-action="cloud-push">⬆ 立即备份</button>
+          <button class="btn ghost" data-action="cloud-pull">⬇ 从云端恢复</button>
+        </div>
+        <p class="muted" id="cloudStatus" style="margin-top:8px">状态：${esc(cloudStatusText)}</p>
       </div>`;
     mount(html);
   }
@@ -1154,6 +1170,31 @@
       case 'export-data': exportData(); break;
       case 'import-data': importModal(); break;
       case 'reset-data': { if (confirm('确定清空所有数据？此操作不可恢复！')) { localStorage.removeItem('yueji_workbench_v1'); location.reload(); } break; }
+      // 云同步
+      case 'cloud-save': {
+        if (!global.CloudSync) break;
+        const token = ($('#cloudToken') && $('#cloudToken').value.trim()) || '';
+        const pwd = ($('#cloudPwd') && $('#cloudPwd').value) || '';
+        const enabled = $('#cloudEnabled') ? $('#cloudEnabled').checked : false;
+        global.CloudSync.configure({ token: token, pwd: pwd, enabled: enabled });
+        toast('云同步配置已保存');
+        renderSettings();
+        break;
+      }
+      case 'cloud-push': {
+        if (!global.CloudSync) break;
+        toast('正在备份到云端…');
+        global.CloudSync.push().then((ok) => { if (ok) toast('已备份到云端 ✓'); else toast('备份失败，看状态行'); });
+        break;
+      }
+      case 'cloud-pull': {
+        if (!global.CloudSync) break;
+        toast('正在从云端恢复…');
+        global.CloudSync.pull().then((ok) => {
+          if (ok) { renderSettings(); toast('已从云端恢复 ✓'); } else toast('恢复失败，看状态行');
+        });
+        break;
+      }
       // 首次引导：把单文件变成手机/桌面 App
       case 'apphint-ok': { try { localStorage.setItem('gw_apphint_v1', '1'); } catch (e) {} closeModal(); break; }
     }
@@ -1366,6 +1407,19 @@
   try { const sv = localStorage.getItem('gw_lastview'); if (sv && VALID_VIEWS.includes(sv)) savedView = sv; } catch (e) {}
   switchView(savedView);
   maybeShowAppHint();
+  // 云同步：状态回显 + 启用时首次从云端拉取 + 切回页面自动同步
+  if (global.CloudSync) {
+    global.CloudSync.setStatusHandler(function (s) {
+      const el = $('#cloudStatus'); if (el) el.textContent = '状态：' + s;
+    });
+    if (global.CloudSync.isEnabled()) global.CloudSync.onVisible();
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible' && global.CloudSync.isEnabled()) global.CloudSync.onVisible();
+    });
+    window.addEventListener('focus', function () {
+      if (global.CloudSync.isEnabled()) global.CloudSync.onVisible();
+    });
+  }
   // 每天 9:00 自动推送更新爆款（若页面常开，跨过 9 点会自动刷新并提示）
   autoRefreshViral();
   setInterval(autoRefreshViral, 60 * 1000);

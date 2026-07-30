@@ -885,6 +885,7 @@ input, textarea, select { font-family: inherit; }
   
   
   
+  
   <script>
     // PWA：仅在 http(s) 下注册 Service Worker（file:// 直接打开时不注册）
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
@@ -976,6 +977,8 @@ input, textarea, select { font-family: inherit; }
 
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) {}
+    // 云同步钩子：启用时自动把变更推到云端（内部有 debounce，不会频繁请求）
+    if (global.CloudSync) { try { global.CloudSync.onSave(); } catch (e) {} }
   }
 
   /* ---------- 通用打卡 ---------- */
@@ -2517,10 +2520,191 @@ input, textarea, select { font-family: inherit; }
 </script>
 <script>
 /* ============================================================
+   cloud-sync.js · 云同步（手机 ↔ 电脑）
+   纯前端方案：把工作台数据序列化后存进你的 GitHub 私密 Gist，
+   手机/电脑配置同一个 PAT 即自动双向同步，无需自建后端。
+   - push：本地 → 私密 Gist（无 gistId 时自动创建）
+   - pull：私密 Gist → 本地（远端优先覆盖）
+   - 可选口令加密（Web Crypto AES-GCM），file:// 非安全上下文降级明文
+   ============================================================ */
+(function (global) {
+  'use strict';
+
+  const CFG_KEY = 'gw_cloud_cfg';
+  const FILENAME = 'gongzuotai-backup.json';
+  const API = 'https://api.github.com/gists';
+  // 固定 salt（仅用于口令派生，非密钥）
+  const SALT = new TextEncoder().encode('gongzuotai-cloud-sync-salt');
+  let DEBOUNCE = 2000;
+
+  let cfg = loadCfg();
+  let timer = null;
+  let statusHandler = null;
+
+  function loadCfg() {
+    try {
+      return Object.assign(
+        { token: '', pwd: '', gistId: '', enabled: false, lastSync: 0 },
+        JSON.parse(localStorage.getItem(CFG_KEY) || '{}')
+      );
+    } catch (e) {
+      return { token: '', pwd: '', gistId: '', enabled: false, lastSync: 0 };
+    }
+  }
+  function saveCfg() {
+    try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+  }
+
+  function setStatus(s) { if (statusHandler) statusHandler(s); }
+
+  /* ---------------- 加密（Web Crypto AES-GCM） ---------------- */
+  const subtle = (global.crypto && global.crypto.subtle) ? global.crypto.subtle : null;
+  const enc = new TextEncoder();
+  const dec = new TextDecoder();
+
+  function bufToB64(buf) {
+    const bytes = new Uint8Array(buf);
+    let bin = '';
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+  function b64ToBuf(b64) {
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+  async function deriveKey(password) {
+    const baseKey = await subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
+    return subtle.deriveKey(
+      { name: 'PBKDF2', salt: SALT, iterations: 100000, hash: 'SHA-256' },
+      baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+  }
+  // 口令为空时退而用 token 派生（有 token 才能解密，多一层防护）；都无则用默认值
+  function passphrase() { return cfg.pwd || cfg.token || 'default'; }
+  async function encrypt(plain) {
+    if (!subtle) return plain; // 非安全上下文降级明文
+    const key = await deriveKey(passphrase());
+    const iv = global.crypto.getRandomValues(new Uint8Array(12));
+    const ct = await subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, enc.encode(plain));
+    return 'enc:' + bufToB64(iv) + ':' + bufToB64(ct);
+  }
+  async function decrypt(payload) {
+    if (!payload || payload.indexOf('enc:') !== 0) return payload; // 明文
+    if (!subtle) throw new Error('当前环境不支持解密（非安全上下文，请用 https 链接访问）');
+    const parts = payload.split(':');
+    const iv = b64ToBuf(parts[1]);
+    const ct = b64ToBuf(parts[2]);
+    const key = await deriveKey(passphrase());
+    const pt = await subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, ct);
+    return dec.decode(pt);
+  }
+
+  /* ---------------- Gist API ---------------- */
+  function headers() {
+    return {
+      'Authorization': 'Bearer ' + cfg.token,
+      'Accept': 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+      'X-GitHub-Api-Version': '2022-11-28',
+    };
+  }
+  async function push() {
+    if (!cfg.enabled || !cfg.token) { setStatus('未启用或缺少 token'); return false; }
+    const plain = global.Store.exportData();
+    const content = await encrypt(plain);
+    const body = JSON.stringify({ public: false, files: { [FILENAME]: { content: content } } });
+    try {
+      let res;
+      if (cfg.gistId) {
+        res = await fetch(API + '/' + cfg.gistId, { method: 'PATCH', headers: headers(), body: body });
+      } else {
+        res = await fetch(API, { method: 'POST', headers: headers(), body: body });
+      }
+      if (!res.ok) {
+        setStatus('备份失败：' + res.status + (res.status === 401 ? '（token 无效或无 gist 权限）' : ''));
+        return false;
+      }
+      const data = await res.json();
+      if (!cfg.gistId && data.id) { cfg.gistId = data.id; }
+      cfg.lastSync = Date.now();
+      saveCfg();
+      setStatus('已备份到云端 · ' + new Date().toLocaleString());
+      return true;
+    } catch (e) {
+      setStatus('备份出错：' + e.message);
+      return false;
+    }
+  }
+  async function pull() {
+    if (!cfg.enabled || !cfg.token || !cfg.gistId) return false;
+    try {
+      const res = await fetch(API + '/' + cfg.gistId, { headers: headers() });
+      if (!res.ok) { setStatus('恢复失败：' + res.status + (res.status === 401 ? '（token 无效）' : '')); return false; }
+      const data = await res.json();
+      const file = data.files && data.files[FILENAME];
+      if (!file || !file.content) { setStatus('云端暂无备份'); return false; }
+      const plain = await decrypt(file.content);
+      const ok = global.Store.importData(plain);
+      if (ok) {
+        cfg.lastSync = Date.now();
+        saveCfg();
+        setStatus('已从云端恢复 · ' + new Date().toLocaleString());
+        return true;
+      }
+      setStatus('恢复失败：数据格式错误');
+      return false;
+    } catch (e) {
+      setStatus('恢复出错：' + e.message);
+      return false;
+    }
+  }
+
+  /* ---------------- 自动触发 ---------------- */
+  function onSave() {
+    if (!cfg.enabled || !cfg.token) return;
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(function () { push(); }, DEBOUNCE);
+  }
+  function onVisible() {
+    if (!cfg.enabled || !cfg.token || !cfg.gistId) return;
+    pull();
+  }
+
+  /* ---------------- 配置 ---------------- */
+  function configure(o) {
+    if (o.token !== undefined) cfg.token = o.token;
+    if (o.pwd !== undefined) cfg.pwd = o.pwd;
+    if (o.enabled !== undefined) cfg.enabled = !!o.enabled;
+    if (o.gistId !== undefined) cfg.gistId = o.gistId;
+    saveCfg();
+  }
+  function getCfg() { return Object.assign({}, cfg); }
+  function isEnabled() { return !!(cfg.enabled && cfg.token); }
+  function setStatusHandler(fn) { statusHandler = fn; }
+
+  global.CloudSync = {
+    configure: configure,
+    push: push,
+    pull: pull,
+    onSave: onSave,
+    onVisible: onVisible,
+    getCfg: getCfg,
+    isEnabled: isEnabled,
+    setStatusHandler: setStatusHandler,
+    _internal: { encrypt: encrypt, decrypt: decrypt, deriveKey: deriveKey, loadCfg: loadCfg, setDebounce: function (ms) { DEBOUNCE = ms; } },
+  };
+})(window);
+
+</script>
+<script>
+/* ============================================================
    app.js · 主程序（视图渲染 + 交互）
    ============================================================ */
 (function () {
   'use strict';
+  const global = window;
 
   const S = Store;
   const $ = (s, r) => (r || document).querySelector(s);
@@ -3501,8 +3685,10 @@ input, textarea, select { font-family: inherit; }
       { k: 'blue', n: '黛蓝', g: 'linear-gradient(135deg,#60a5fa,#cffafe)' },
       { k: 'pink', n: '樱粉', g: 'linear-gradient(135deg,#f9a8d4,#fecdd3)' },
     ];
+    const cc = (global.CloudSync && global.CloudSync.getCfg) ? global.CloudSync.getCfg() : {};
+    const cloudStatusText = cc.lastSync ? ('上次同步：' + new Date(cc.lastSync).toLocaleString()) : '尚未同步';
     const html = `
-      <div class="view-head"><div><div class="view-title">设置</div><div class="view-desc">皮肤主题 · 资料 · 数据备份</div></div></div>
+      <div class="view-head"><div><div class="view-title">设置</div><div class="view-desc">皮肤主题 · 资料 · 数据备份 · 云同步</div></div></div>
       <div class="card">
         <div class="sec-title">🎨 高级皮肤（5 套 · 可随时切换）</div>
         <div class="theme-grid">
@@ -3523,6 +3709,19 @@ input, textarea, select { font-family: inherit; }
           <button class="btn ghost" data-action="import-data">⬆ 导入备份</button>
           <button class="btn danger" data-action="reset-data">🗑 清空数据</button>
         </div>
+      </div>
+      <div class="card" style="margin-top:18px">
+        <div class="sec-title">☁ 云同步（手机 ↔ 电脑自动同步）</div>
+        <p class="muted">用 GitHub 私密 Gist 同步，需一个 GitHub 私人访问令牌(PAT，勾选 gist 权限)；手机电脑填<b>同一个令牌</b>即自动同步。建议设加密口令，云端内容才加密（令牌与口令均仅存本机浏览器）。</p>
+        <div class="field"><label>GitHub 令牌 (PAT)</label><input type="password" class="input" id="cloudToken" placeholder="ghp_..." value="${esc(cc.token || '')}"></div>
+        <div class="field"><label>加密口令（可选，建议设置）</label><input type="password" class="input" id="cloudPwd" placeholder="设一个口令，云端内容才加密" value="${esc(cc.pwd || '')}"></div>
+        <label class="row" style="align-items:center;gap:8px;margin-top:6px;flex:none"><input type="checkbox" id="cloudEnabled" ${cc.enabled ? 'checked' : ''}><span>启用自动同步（每次改动自动备份到云端）</span></label>
+        <div class="row" style="flex:none;margin-top:8px">
+          <button class="btn" data-action="cloud-save">💾 保存配置</button>
+          <button class="btn ghost" data-action="cloud-push">⬆ 立即备份</button>
+          <button class="btn ghost" data-action="cloud-pull">⬇ 从云端恢复</button>
+        </div>
+        <p class="muted" id="cloudStatus" style="margin-top:8px">状态：${esc(cloudStatusText)}</p>
       </div>`;
     mount(html);
   }
@@ -3672,6 +3871,31 @@ input, textarea, select { font-family: inherit; }
       case 'export-data': exportData(); break;
       case 'import-data': importModal(); break;
       case 'reset-data': { if (confirm('确定清空所有数据？此操作不可恢复！')) { localStorage.removeItem('yueji_workbench_v1'); location.reload(); } break; }
+      // 云同步
+      case 'cloud-save': {
+        if (!global.CloudSync) break;
+        const token = ($('#cloudToken') && $('#cloudToken').value.trim()) || '';
+        const pwd = ($('#cloudPwd') && $('#cloudPwd').value) || '';
+        const enabled = $('#cloudEnabled') ? $('#cloudEnabled').checked : false;
+        global.CloudSync.configure({ token: token, pwd: pwd, enabled: enabled });
+        toast('云同步配置已保存');
+        renderSettings();
+        break;
+      }
+      case 'cloud-push': {
+        if (!global.CloudSync) break;
+        toast('正在备份到云端…');
+        global.CloudSync.push().then((ok) => { if (ok) toast('已备份到云端 ✓'); else toast('备份失败，看状态行'); });
+        break;
+      }
+      case 'cloud-pull': {
+        if (!global.CloudSync) break;
+        toast('正在从云端恢复…');
+        global.CloudSync.pull().then((ok) => {
+          if (ok) { renderSettings(); toast('已从云端恢复 ✓'); } else toast('恢复失败，看状态行');
+        });
+        break;
+      }
       // 首次引导：把单文件变成手机/桌面 App
       case 'apphint-ok': { try { localStorage.setItem('gw_apphint_v1', '1'); } catch (e) {} closeModal(); break; }
     }
@@ -3884,6 +4108,19 @@ input, textarea, select { font-family: inherit; }
   try { const sv = localStorage.getItem('gw_lastview'); if (sv && VALID_VIEWS.includes(sv)) savedView = sv; } catch (e) {}
   switchView(savedView);
   maybeShowAppHint();
+  // 云同步：状态回显 + 启用时首次从云端拉取 + 切回页面自动同步
+  if (global.CloudSync) {
+    global.CloudSync.setStatusHandler(function (s) {
+      const el = $('#cloudStatus'); if (el) el.textContent = '状态：' + s;
+    });
+    if (global.CloudSync.isEnabled()) global.CloudSync.onVisible();
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible' && global.CloudSync.isEnabled()) global.CloudSync.onVisible();
+    });
+    window.addEventListener('focus', function () {
+      if (global.CloudSync.isEnabled()) global.CloudSync.onVisible();
+    });
+  }
   // 每天 9:00 自动推送更新爆款（若页面常开，跨过 9 点会自动刷新并提示）
   autoRefreshViral();
   setInterval(autoRefreshViral, 60 * 1000);

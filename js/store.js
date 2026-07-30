@@ -73,6 +73,8 @@
 
   function save() {
     try { localStorage.setItem(STORE_KEY, JSON.stringify(DB)); } catch (e) {}
+    // 云同步钩子：启用时自动把变更推到云端（内部有 debounce，不会频繁请求）
+    if (global.CloudSync) { try { global.CloudSync.onSave(); } catch (e) {} }
   }
 
   /* ---------- 通用打卡 ---------- */
